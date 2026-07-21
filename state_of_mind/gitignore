@@ -1,0 +1,15 @@
+# Secrets — never commit these. Real values live only on your machine.
+.env
+config.properties
+
+# Python
+__pycache__/
+*.pyc
+
+# Java
+*.class
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+.vscode/
