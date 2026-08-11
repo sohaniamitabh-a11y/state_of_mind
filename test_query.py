@@ -1,9 +1,8 @@
 import os
 from dotenv import load_dotenv
-import mysql.connector
+import mysql.connector 
 
 load_dotenv()
-
 conn = mysql.connector.connect(
     host=os.getenv("DB_HOST"),
     port=int(os.getenv("DB_PORT")),
@@ -15,19 +14,24 @@ conn = mysql.connector.connect(
 )
 
 cursor = conn.cursor()
-
-
-
-cursor.execute("""SELECT items.title , items.media_type , items.popularity_score , mood_genre_mapping.relevance_score 
+cursor.execute("""
+SELECT items.title , items.media_type , items.popularity_score , mood_genre_mapping.relevance_score
 FROM moods
 JOIN mood_genre_mapping ON moods.id = mood_genre_mapping.mood_id
 JOIN item_genres ON mood_genre_mapping.genre_id = item_genres.genre_id
 JOIN items ON item_genres.item_id = items.id
 WHERE moods.name = %s
 ORDER BY mood_genre_mapping.relevance_score DESC , items.popularity_score DESC 
-""", ("Happy/Excitement",))
+""",("Happy/Excitement",))
+
 rows = cursor.fetchall()
-print(rows)
+uncopy = {}  #used to get rid of duplicate data and only keep the best 
+
+for title , media_type , popularity , relevance in rows :
+    if title not in uncopy or relevance > uncopy[title][2]: #[2] is the index for relevance soce which we compare to get the best 
+        uncopy[title] = (media_type , popularity , relevance)
+    
+print(uncopy)
 
 cursor.close()
 conn.close()
