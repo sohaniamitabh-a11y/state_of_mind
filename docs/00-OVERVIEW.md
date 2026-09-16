@@ -60,3 +60,6 @@ Teammates haven't finished onboarding yet, so the current developer is working s
 7. [06-BRAIN-AND-RATINGS.md](06-BRAIN-AND-RATINGS.md) — where relevance scores come from
 8. [07-SETUP.md](07-SETUP.md) — getting a device running
 9. [08-DECISIONS.md](08-DECISIONS.md) — decisions made and why
+10. [09-COMMIT-HISTORY.md](09-COMMIT-HISTORY.md) — what each existing commit actually changed
+
+Contributing and commit conventions are in [CONTRIBUTING.md](../CONTRIBUTING.md).
