@@ -179,5 +179,14 @@ Not decisions yet — things consciously left unresolved.
 
 - **Whether to migrate off RAWG.** Deferred above; forced if the key never materialises.
 - **Whether `feedback` ever gets wired up.** The table exists and is empty; there's no feedback loop and the Brain doesn't learn.
-- **Whether the harvesters should pass SSL parameters** like every other script does. `harvest_movies_tv.py` works without them, but the inconsistency should be settled before other devices come online. See [04-HARVESTERS.md](04-HARVESTERS.md).
 - **Whether to expand the music catalog beyond aliases + Other** if survey ratings later justify more Deezer-aligned buckets.
+
+---
+
+## Harvesters use the same SSL + `DB_NAME` connect path as `app.py`
+
+All three harvesters read `DB_NAME` and `DB_SSL_CA` and set `ssl_verify_cert=True`, matching `app.py` and the runner scripts.
+
+**Why:** Aiven requires verified SSL. Leaving harvesters on a bare connect (or a hardcoded database name) meant games/music could fail on teammates' machines even when the runners worked, and a non-default `DB_NAME` would silently point the API at one database and the harvesters at another.
+
+**The cost:** every device must have a valid `DB_SSL_CA` path in `.env` (the repo ships `ignore/ca.pem`). That was already true for runners and `app.py`.

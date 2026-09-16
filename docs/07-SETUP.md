@@ -45,13 +45,9 @@ Nobody needs all three. One API per device is deliberate — see [04-HARVESTERS.
 
 ### `DB_SSL_CA`
 
-The Aiven instance requires SSL. `DB_SSL_CA` is a path to the CA certificate, which is present in the repo at `ignore/ca.pem`. `app.py`, `test_query.py`, and the runner scripts pass it as `ssl_ca` alongside `ssl_verify_cert=True`, and will fail to connect without it.
+The Aiven instance requires SSL. `DB_SSL_CA` is a path to the CA certificate, which is present in the repo at `ignore/ca.pem`. `app.py`, `test_query.py`, the runner scripts, and all three harvesters pass it as `ssl_ca` alongside `ssl_verify_cert=True`, and will fail to connect without it.
 
-The three harvesters currently do **not** read `DB_SSL_CA` and don't set any SSL parameters, even though `harvest_movies_tv.py` has been tested working against the live instance. Worth reconciling before the games and music harvesters run on other machines.
-
-Also note the harvesters hardcode `"database": "state_of_mind"` rather than reading `DB_NAME`, so setting `DB_NAME` to anything else would silently apply to the runners and `app.py` but not to the harvesters.
-
-The in-file setup docstrings at the top of each harvester predate `DB_NAME` and `DB_SSL_CA` and don't mention them. Use this document instead.
+Harvesters also read `DB_NAME` (defaulting to `state_of_mind` if unset), same as the runners and `app.py`.
 
 ## First-time database setup
 
