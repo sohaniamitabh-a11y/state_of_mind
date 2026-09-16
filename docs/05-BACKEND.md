@@ -10,7 +10,7 @@ A Flask app in `app.py`, being built deliberately as a seven-stage learning exer
 | 2 | Reading query params — `/get-state?mood=X` via `request.args` | Done |
 | 3 | Live connection to the cloud DB from inside a request | Done |
 | 4 | The full mood → genre → items join, wired into the live route | Done |
-| 5 | Shaping the response: dedupe, bucket into movies_tv / music / games, cap at top 5 each | **In progress** |
+| 5 | Shaping the response: dedupe, bucket into movies_tv / music / games, cap at top 5 each | Done |
 | 6 | Error handling — 404 on invalid or missing mood | Not started |
 | 7 | Testing the API standalone, without the frontend | Not started |
 
@@ -18,9 +18,9 @@ A Flask app in `app.py`, being built deliberately as a seven-stage learning exer
 
 Two routes.
 
-`GET /` returns a plain liveness string.
+`GET /` returns a JSON liveness object `{"message": "State of Mind backend is running"}`.
 
-`GET /get-state?mood=<name>` reads the mood parameter, opens a MySQL connection inside the request handler, runs the four-table join, closes the connection, and returns the result:
+`GET /get-state?mood=<name>` reads the mood parameter, opens a MySQL connection, runs the join, processes the results, closes the connection, and returns JSON buckets:
 
 ```14:41:app.py
 @app.route("/get-state")
@@ -61,47 +61,24 @@ The sort order is `relevance_score DESC, popularity_score DESC`. Relevance-first
 
 The query is parameterised with `%s` and a tuple, so the mood string is never string-concatenated into SQL.
 
-## Stage 5 in detail — where the work actually is
+## Stage 5 in detail — shaping the response
 
-Stage 5 has three sub-tasks. One is done but unmerged, two haven't been started.
+Stage 5 ensures the frontend gets clean, display-ready data:
 
-### Dedupe — written and tested, NOT yet in `app.py`
+1. **Deduplication:** A many-to-many `item_genres` join returns an item multiple times if several of its genres match the mood. The backend preserves only the occurrence with the highest `relevance_score` using `remove_duplicates()`.
+2. **Bucketing:** Recommendations are split into `"movies_tv"`, `"music"`, and `"games"` categories via `group_items_by_media()`.
+3. **Capping:** Each bucket is sliced to `[:5]` by `cap_each_bucket()`. The SQL `ORDER BY` is preserved throughout, so the five kept are the best available.
 
-The dedupe logic lives in `test_query.py`, a standalone script that runs the same join with the mood hardcoded to `Happy/Excitement`. It works. It has simply not been carried across into `app.py` yet.
+Because these tasks run as isolated functions inside `app.py`, the main `/get-state` route stays focused on handling the request and talking to MySQL.
 
-```27:34:test_query.py
-rows = cursor.fetchall()
-uncopy = {}  #used to get rid of duplicate data and only keep the best 
-
-for title , media_type , popularity , relevance in rows :
-    if title not in uncopy or relevance > uncopy[title][2]: #[2] is the index for relevance soce which we compare to get the best 
-        uncopy[title] = (media_type , popularity , relevance)
-    
-print(uncopy)
+```json
+{
+  "mood": "Happy/Excitement",
+  "movies_tv": [...],
+  "music": [...],
+  "games": [...]
+}
 ```
-
-The approach: build a dict keyed on title, and for each row either insert it or overwrite an existing entry when the new relevance is higher. The stored tuple is `(media_type, popularity, relevance)`, so index `[2]` is the relevance being compared.
-
-Two things about it worth knowing before it gets merged:
-
-- Because the SQL already sorts `relevance_score DESC`, the first row seen for any given title is always its highest-scoring one. The `relevance > uncopy[title][2]` branch is therefore never actually reached in practice — the logic reduces to "keep the first occurrence". That's the correct outcome; the comparison is just belt-and-braces.
-- The dict key is the title alone, not `(media_type, title)`. Two different items sharing a title — a film and a track of the same name — would collide and one would be dropped. Not currently reachable with movies/TV-only data, but it will become reachable the moment the music and games harvesters run.
-
-### Bucketing into movies_tv / music / games — not started
-
-The response needs to be grouped by domain, and there are four `media_type` values in `items` mapping onto three buckets:
-
-| Bucket | `items.media_type` values |
-|---|---|
-| `movies_tv` | `'movie'`, `'tv'` |
-| `music` | `'music'` |
-| `games` | `'game'` |
-
-Note the asymmetry: `movies_tv` is the only bucket that merges two media types.
-
-### Top-5 cap per bucket — not started
-
-Each bucket is to be capped at its best five entries, taking the existing relevance-then-popularity order as given.
 
 ## Stage 6 — error handling, not started
 
