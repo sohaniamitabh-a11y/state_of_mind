@@ -5,6 +5,8 @@ config.properties
 # Python
 __pycache__/
 *.pyc
+.venv/
+venv/
 
 # Java
 *.class

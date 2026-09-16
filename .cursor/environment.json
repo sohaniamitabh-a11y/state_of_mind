@@ -1,0 +1,12 @@
+{
+  "name": "State of Mind",
+  "user": "ubuntu",
+  "install": "bash .cursor/install.sh",
+  "start": "bash .cursor/start.sh",
+  "terminals": [
+    {
+      "name": "flask-app",
+      "command": "source .venv/bin/activate && python3 app.py"
+    }
+  ]
+}
