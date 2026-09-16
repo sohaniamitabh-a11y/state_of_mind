@@ -156,6 +156,7 @@ If you're setting up a fresh database rather than connecting to the shared one, 
 | [07-SETUP.md](docs/07-SETUP.md) | Per-device setup and teammate onboarding |
 | [08-DECISIONS.md](docs/08-DECISIONS.md) | Every significant design decision, its reasoning, and its cost |
 | [09-COMMIT-HISTORY.md](docs/09-COMMIT-HISTORY.md) | What each existing commit actually changed |
+| [architecture-baseline.docx](docs/architecture-baseline.docx) | Evidence-cited architecture baseline (component map, schema, conventions, gaps) |
 
 Contributing conventions — including commit message format — are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
