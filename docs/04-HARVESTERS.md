@@ -82,8 +82,6 @@ Matching is still **by name** against `genres.name` — there's no Deezer genre 
 
 ## Cross-cutting notes
 
-**The harvesters don't pass SSL parameters.** All three build a `DB_CONFIG` dict with `host`, `port`, `user`, `password`, and a hardcoded `"database": "state_of_mind"`. None of them read `DB_SSL_CA` or set `ssl_verify_cert`, unlike `app.py`, `test_query.py`, and the runner scripts, which all do. `harvest_movies_tv.py` was nonetheless tested working against the live Aiven instance. This inconsistency is worth reconciling before the games and music harvesters run on teammates' machines, so all six-plus scripts connect the same way.
+**All three harvesters pass SSL the same way as `app.py`.** Each builds a `DB_CONFIG` with `host`, `port`, `user`, `password`, `database=os.getenv("DB_NAME", ...)`, `ssl_ca=os.getenv("DB_SSL_CA")`, and `ssl_verify_cert=True`. That matches `app.py`, `test_query.py`, and the runner scripts, so Aiven connections work from every device without a special case.
 
-**Database name is hardcoded in the harvesters** as `"state_of_mind"`, whereas every other script reads `DB_NAME` from the environment.
-
-**Their setup docstrings are slightly out of date** — each lists the four DB variables plus its own API key, but omits `DB_NAME` and `DB_SSL_CA`, which the rest of the project relies on. Follow [07-SETUP.md](07-SETUP.md) rather than the in-file docstrings.
+**Their setup docstrings list the required `.env` keys**, including `DB_NAME` and `DB_SSL_CA`. Prefer [07-SETUP.md](07-SETUP.md) if anything drifts.
