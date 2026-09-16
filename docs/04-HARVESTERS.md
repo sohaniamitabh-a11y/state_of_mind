@@ -68,19 +68,21 @@ Per-item handling:
 - **Popularity:** `track["rank"]`, Deezer's own ranking figure.
 - **Rate limiting:** a `time.sleep(0.2)` after each track, since the loop makes an extra request per track.
 
-### The known genre gap
-
-This is the script's real weakness and it's documented in its own header.
+### Genre matching (aliases + Other fallback)
 
 Deezer track objects don't carry genre. Genre lives on the **album**, which forces one extra API call per track just to reach it. `fetch_album_genre_names()` makes that call, returns the album's genre names, and returns an empty list if the album has no genre data or the request fails.
 
-Worse, matching is done **by name** against `genres.name` — there's no reliable ID to match on, because automated fetching of Deezer's full genre list was blocked earlier in the project and their genre ID/name list was never independently verified. Deezer's genre vocabulary doesn't line up one-to-one with the ten hand-curated music genre names in the database, so unmatched genres are silently skipped rather than guessed at.
+Matching is still **by name** against `genres.name` — there's no Deezer genre ID seeded into `external_id`. The flow in `link_item_genres()` is:
 
-Expect a meaningful number of tracks to land in `items` with zero rows in `item_genres`. **This is a known limitation, not a bug.** The practical consequence is significant: an item with no `item_genres` rows can never be returned by the recommendation join, so those tracks would be dead weight in the cache until the gap is addressed.
+1. **Exact match** on the Deezer name against a music row in `genres`.
+2. **Alias map** for known near-misses (`Dance` → `Dance/EDM`, `Rap/Hip Hop` → `Rap/Hip-Hop`, `Jazz` → `Jazz/Acoustic`, `Electro` → `Techno`).
+3. **Fallback to `Other`** only when *zero* names on the track linked — so a track that matched Pop but also had an unmatched "Indie Rock" keeps Pop and does not get Other. Individual unmatched names are still silently skipped in that case.
+
+`Other` is the eleventh music genre (see `add_other_music_genre.sql`), mapped to all five moods at relevance `0.25` so unmatched tracks stay recommendable but ranked below curated genres. Apply that SQL via `run_add_other_music_genre.py` before the music harvest runs.
 
 ## Cross-cutting notes
 
-**The harvesters don't pass SSL parameters.** All three build a `DB_CONFIG` dict with `host`, `port`, `user`, `password`, and a hardcoded `"database": "state_of_mind"`. None of them read `DB_SSL_CA` or set `ssl_verify_cert`, unlike `app.py`, `test_query.py`, and the four runner scripts, which all do. `harvest_movies_tv.py` was nonetheless tested working against the live Aiven instance. This inconsistency is worth reconciling before the games and music harvesters run on teammates' machines, so all six-plus scripts connect the same way.
+**The harvesters don't pass SSL parameters.** All three build a `DB_CONFIG` dict with `host`, `port`, `user`, `password`, and a hardcoded `"database": "state_of_mind"`. None of them read `DB_SSL_CA` or set `ssl_verify_cert`, unlike `app.py`, `test_query.py`, and the runner scripts, which all do. `harvest_movies_tv.py` was nonetheless tested working against the live Aiven instance. This inconsistency is worth reconciling before the games and music harvesters run on teammates' machines, so all six-plus scripts connect the same way.
 
 **Database name is hardcoded in the harvesters** as `"state_of_mind"`, whereas every other script reads `DB_NAME` from the environment.
 

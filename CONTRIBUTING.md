@@ -63,7 +63,7 @@ Be aware that the `ignore/` directory is **not** git-ignored despite its name â€
 
 ## Before you push
 
-- `python check_table.py` still connects and reports `moods: 5`, `genres: 63`.
+- `python check_table.py` still connects and reports `moods: 5`, `genres: 64`.
 - `python app.py` starts and `/get-state?mood=Happy/Excitement` returns rows.
 - If you changed SQL, confirm the relevant `run_*.py` applies it cleanly against the shared database, and that re-running it is still a no-op.
 

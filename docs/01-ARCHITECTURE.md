@@ -34,7 +34,7 @@ Not code. A table. It holds one row per (mood, genre) pair with a `relevance_sco
 
 Because it's data rather than logic, re-tuning the engine's taste means running INSERTs, not editing and redeploying Python. See [06-BRAIN-AND-RATINGS.md](06-BRAIN-AND-RATINGS.md) for how those scores are produced.
 
-Status: done and live, 46 rows.
+Status: done and live, 51 rows.
 
 ### 2. The Harvester — three independent scripts
 
