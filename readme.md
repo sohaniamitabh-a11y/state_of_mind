@@ -38,7 +38,7 @@ Ranking is **`relevance_score` first, `popularity_score` only as a tiebreaker** 
 |---|---|---|
 | **The Brain** | Done / live | `mood_genre_mapping` — 51 weighted mood-to-genre rows (46 from team ratings + 5 for music `Other`). 74 more queued, awaiting survey results |
 | **The Harvester** | Partial | Movies/TV tested and working. Games blocked on a RAWG API key. Music written but never run |
-| **The Backend / Engine** | Stage 4 of 7 | Join query live on `/get-state`, returns raw duplicated rows. Stage 5 (dedupe, bucketing, top-5 cap) in progress |
+| **The Backend / Engine** | Stage 5 of 7 | `/get-state` endpoint is wired, deduplicated, bucketed, and capped. Stage 6 (404 handling) next |
 | **Frontend** | Not started | Planned Flutter app — five fixed mood buttons, no free-text input. Zero code yet |
 
 **Live database right now:** 5 moods, 64 genres, 51 Brain rows, 40 items (movies and TV only — no games or music harvested yet), `item_genres` populated from those items, `feedback` empty and unused.
@@ -51,11 +51,11 @@ Built deliberately as a step-by-step learning project rather than from a generic
 - [x] **Stage 2** — Reading query params (`/get-state?mood=X`) via `request.args`
 - [x] **Stage 3** — Live connection to the cloud DB from inside a request
 - [x] **Stage 4** — The full mood → genre → items join query, wired into the live route
-- [ ] **Stage 5** — Shaping the response: dedupe results, bucket into movies_tv / music / games, cap at top 5 each
+- [x] **Stage 5** — Shaping the response: dedupe results, bucket into movies_tv / music / games, cap at top 5 each
 - [ ] **Stage 6** — Error handling (404 on invalid/missing mood)
 - [ ] **Stage 7** — Testing the API standalone, without the frontend
 
-Stage 5 is partly done: the dedupe works in `test_query.py` but hasn't been merged into `app.py` yet. Bucketing and the cap haven't been started. See [05-BACKEND.md](docs/05-BACKEND.md).
+Stage 5 is complete: `app.py` groups unique items into three JSON buckets, capped at 5 each. See [05-BACKEND.md](docs/05-BACKEND.md).
 
 ## What's in this repo
 
