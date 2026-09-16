@@ -45,7 +45,7 @@ Nobody needs all three. One API per device is deliberate — see [04-HARVESTERS.
 
 ### `DB_SSL_CA`
 
-The Aiven instance requires SSL. `DB_SSL_CA` is a path to the CA certificate, which is present in the repo at `ignore/ca.pem`. `app.py`, `test_query.py`, and all four runner scripts pass it as `ssl_ca` alongside `ssl_verify_cert=True`, and will fail to connect without it.
+The Aiven instance requires SSL. `DB_SSL_CA` is a path to the CA certificate, which is present in the repo at `ignore/ca.pem`. `app.py`, `test_query.py`, and the runner scripts pass it as `ssl_ca` alongside `ssl_verify_cert=True`, and will fail to connect without it.
 
 The three harvesters currently do **not** read `DB_SSL_CA` and don't set any SSL parameters, even though `harvest_movies_tv.py` has been tested working against the live instance. Worth reconciling before the games and music harvesters run on other machines.
 
@@ -60,13 +60,14 @@ Only needed once per database, not once per device — the three devices share o
 Run in this exact order. Foreign keys make the ordering mandatory, not just advisory.
 
 ```
-python run_schema.py          # creates the 6 tables
-python run_seed.py            # 5 moods + first 38 genres
-python run_expand_genres.py   # +25 genres, total 63
-python run_mapping.py         # the 46 mood_genre_mapping rows
+python run_schema.py                  # creates the 6 tables
+python run_seed.py                    # 5 moods + first 38 genres
+python run_expand_genres.py           # +25 genres, total 63
+python run_mapping.py                 # the original 46 mood_genre_mapping rows
+python run_add_other_music_genre.py   # music Other + 5 Brain rows → 64 genres, 51 mappings
 ```
 
-All four are safe to re-run. Each catches the relevant "already exists" or "duplicate entry" error, prints a skip message, and continues; anything else raises and stops the run. Details in [03-DATA-PIPELINE.md](03-DATA-PIPELINE.md).
+All five are safe to re-run. Each catches the relevant "already exists" or "duplicate entry" error, prints a skip message, and continues; anything else raises and stops the run. Details in [03-DATA-PIPELINE.md](03-DATA-PIPELINE.md).
 
 Each runner is hardcoded to exactly one `.sql` file, so there are no arguments to pass.
 
@@ -76,7 +77,7 @@ Verify:
 python check_table.py
 ```
 
-Expect `moods: 5` and `genres: 63`. That script only covers those two tables — confirming the other four means querying by hand.
+Expect `moods: 5` and `genres: 64`. That script only covers those two tables — confirming the other four means querying by hand.
 
 ## Running things
 

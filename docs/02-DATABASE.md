@@ -7,8 +7,8 @@ Cloud-hosted Aiven MySQL, database name `state_of_mind`, SSL required. Defined i
 | Table | Rows right now | Note |
 |---|---|---|
 | `moods` | 5 | Complete; the five moods are fixed |
-| `genres` | 63 | Complete for the four current media types |
-| `mood_genre_mapping` | 46 | 74 more rows queued, waiting on genre-expansion ratings |
+| `genres` | 64 | Complete for the four current media types (includes music `Other`) |
+| `mood_genre_mapping` | 51 | 46 original + 5 for music `Other`; 74 more rows still queued on genre-expansion ratings |
 | `items` | 40 | Movies and TV only — no games or music harvested yet |
 | `item_genres` | populated from those 40 items | |
 | `feedback` | 0 | Schema exists, nothing reads or writes it |
@@ -48,20 +48,20 @@ Every genre from every source lives in this one table, tagged by `media_type`. C
 
 The UNIQUE constraint is on the **pair**, not on either column alone, because TMDB's `'16'` and RAWG's `'16'` would otherwise collide even though they're unrelated genres.
 
-### Current 63 genres by media type
+### Current 64 genres by media type
 
 | media_type | Count | Matched on | Source |
 |---|---|---|---|
 | `movie` | 19 | `external_id` = TMDB numeric genre ID | TMDB's full movie genre list |
 | `tv` | 16 | `external_id` = TMDB numeric genre ID | TMDB's full TV genre list |
 | `game` | 18 | `external_id` = RAWG slug | RAWG's genre slugs |
-| `music` | 10 | `name` (external_id is NULL) | Hand-curated buckets, not an API list |
+| `music` | 11 | `name` (external_id is NULL) | Hand-curated buckets, not an API list |
 
-These arrived in two passes. `seed_mood_genre.sql` inserted the initial 38 (11 movie, 7 TV, 10 music, 10 game), and `expand_genres.sql` later added the missing 25 (8 movie, 9 TV, 8 game), bringing movie to its full 19 and TV to its full 16. Music was left untouched at 10 because Deezer has no fixed public taxonomy to complete against.
+These arrived in three passes. `seed_mood_genre.sql` inserted the initial 38 (11 movie, 7 TV, 10 music, 10 game), `expand_genres.sql` later added the missing 25 (8 movie, 9 TV, 8 game), and `add_other_music_genre.sql` added the eleventh music genre `Other` as a Deezer unmatched-name fallback. Movie and TV are at their full TMDB lists; music stays hand-curated because Deezer has no fixed public taxonomy to complete against.
 
-The ten music genres are `Pop`, `Dance/EDM`, `Rap/Hip-Hop`, `Jazz/Acoustic`, `Blues`, `Classical`, `Metal`, `Punk`, `Techno`, `Ambient/Soundscape`. `Ambient/Soundscape` is entirely invented — no source API offers it — and is the clearest example of why `external_id` had to be nullable.
+The eleven music genres are `Pop`, `Dance/EDM`, `Rap/Hip-Hop`, `Jazz/Acoustic`, `Blues`, `Classical`, `Metal`, `Punk`, `Techno`, `Ambient/Soundscape`, `Other`. `Ambient/Soundscape` is entirely invented — no source API offers it — and is the clearest example of why `external_id` had to be nullable. `Other` is the catch-all for Deezer names that don't exact-match or alias onto a curated bucket (see [04-HARVESTERS.md](04-HARVESTERS.md)).
 
-**One inconsistency to be aware of:** a trailing comment in `expand_genres.sql` claims the expansion brings game genres "to the full 19", and `harvest_games.py` refers to an "original 19-slug list". The actual count from the two seed files is 18 game genres (10 + 8), which is what reconciles with the live total of 63. The comments are off by one, not the data.
+**One inconsistency to be aware of:** a trailing comment in `expand_genres.sql` claims the expansion brings game genres "to the full 19", and `harvest_games.py` refers to an "original 19-slug list". The actual count from the two seed files is 18 game genres (10 + 8), which with music at 11 reconciles with the live total of 64. The comments are off by one, not the data.
 
 ## Table 3 — `mood_genre_mapping` (the Brain)
 
@@ -82,17 +82,17 @@ The composite primary key means a mood can't link to the same genre twice, while
 
 The foreign keys are written as separate `FOREIGN KEY` clauses rather than inline `REFERENCES` on the column, because MySQL parses the inline form but silently ignores it — the constraint would never actually be created.
 
-### The 46 live rows
+### The 51 live rows
 
 | Mood | Mapped genres |
 |---|---|
-| Happy/Excitement | 11 |
-| Calm/Serene | 9 |
-| Sad/Melancholy | 8 |
-| Anger/Rage | 11 |
-| Confusion/Anxiety | 7 |
+| Happy/Excitement | 12 |
+| Calm/Serene | 10 |
+| Sad/Melancholy | 9 |
+| Anger/Rage | 12 |
+| Confusion/Anxiety | 8 |
 
-Every row lives in `mood_genre_mapping_inserts.sql`, one INSERT per pair, each resolving `mood_id` and `genre_id` through subqueries rather than hardcoded integers — so the file stays correct regardless of what auto-increment IDs the seed happened to produce on a given run.
+The original 46 rows live in `mood_genre_mapping_inserts.sql`, one INSERT per pair, each resolving `mood_id` and `genre_id` through subqueries rather than hardcoded integers — so the file stays correct regardless of what auto-increment IDs the seed happened to produce on a given run. The extra 5 rows (`Other` × each mood at `0.25`) live in `add_other_music_genre.sql` and use the same subquery pattern.
 
 Note the lookup column differs per media type, which is why the subqueries aren't uniform: movie and TV rows match on `external_id` against TMDB's numeric ID, game rows match on `external_id` against RAWG's slug, and music rows match on `name` because there's no ID to lean on.
 

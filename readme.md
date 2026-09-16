@@ -36,12 +36,12 @@ Ranking is **`relevance_score` first, `popularity_score` only as a tiebreaker** 
 
 | Component | Status | Detail |
 |---|---|---|
-| **The Brain** | Done / live | `mood_genre_mapping` — 46 weighted mood-to-genre rows from team ratings. 74 more queued, awaiting survey results |
+| **The Brain** | Done / live | `mood_genre_mapping` — 51 weighted mood-to-genre rows (46 from team ratings + 5 for music `Other`). 74 more queued, awaiting survey results |
 | **The Harvester** | Partial | Movies/TV tested and working. Games blocked on a RAWG API key. Music written but never run |
 | **The Backend / Engine** | Stage 4 of 7 | Join query live on `/get-state`, returns raw duplicated rows. Stage 5 (dedupe, bucketing, top-5 cap) in progress |
 | **Frontend** | Not started | Planned Flutter app — five fixed mood buttons, no free-text input. Zero code yet |
 
-**Live database right now:** 5 moods, 63 genres, 46 Brain rows, 40 items (movies and TV only — no games or music harvested yet), `item_genres` populated from those items, `feedback` empty and unused.
+**Live database right now:** 5 moods, 64 genres, 51 Brain rows, 40 items (movies and TV only — no games or music harvested yet), `item_genres` populated from those items, `feedback` empty and unused.
 
 ### Backend stages
 
@@ -82,8 +82,9 @@ Every file, and what it's for. Files are currently flat in the root; nothing has
 |---|---|
 | `schema.sql` | The six tables. Heavily commented with the reasoning behind each column choice |
 | `seed_mood_genre.sql` | The 5 moods and the first 38 genres |
-| `expand_genres.sql` | 25 further genres, bringing the catalog to 63 |
-| `mood_genre_mapping_inserts.sql` | The Brain — 46 mood-genre relevance scores, one INSERT per pair |
+| `expand_genres.sql` | 25 further genres, bringing the catalog to 63 before the music `Other` fallback |
+| `add_other_music_genre.sql` | Music fallback genre `Other` + 5 Brain rows (all moods at relevance 0.25) |
+| `mood_genre_mapping_inserts.sql` | The Brain — 46 original mood-genre relevance scores, one INSERT per pair |
 
 ### Runners and checks
 
@@ -95,6 +96,7 @@ Each runner applies exactly one SQL file to the remote SSL-required database, an
 | `run_seed.py` | `seed_mood_genre.sql` |
 | `run_expand_genres.py` | `expand_genres.sql` |
 | `run_mapping.py` | `mood_genre_mapping_inserts.sql` |
+| `run_add_other_music_genre.py` | `add_other_music_genre.sql` |
 | `check_table.py` | Nothing — prints row counts for `moods` and `genres` as a sanity check |
 
 ### Other
@@ -136,7 +138,7 @@ Each device only needs the one key for its own harvester: `TMDB_API_KEY` for mov
 Verify the connection, then run the API:
 
 ```bash
-python check_table.py     # expect: moods: 5, genres: 63
+python check_table.py     # expect: moods: 5, genres: 64
 python app.py             # then try /get-state?mood=Happy/Excitement
 ```
 

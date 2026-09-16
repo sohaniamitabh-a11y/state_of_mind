@@ -9,18 +9,19 @@ How data actually gets into the database, in the order it has to happen. Everyth
  2. seed_mood_genre.sql   via run_seed.py           → 5 moods + first 38 genres
  3. expand_genres.sql     via run_expand_genres.py  → +25 genres, total 63
  4. Google Forms survey   (outside the repo)        → human relevance ratings
- 5. mood_genre_mapping_inserts.sql via run_mapping.py → the 46 Brain rows
+ 5. mood_genre_mapping_inserts.sql via run_mapping.py → the original 46 Brain rows
+ 5b. add_other_music_genre.sql via run_add_other_music_genre.py → music Other + 5 Brain rows (total 64 genres, 51 mappings)
  6. harvest_*.py          scheduled, per device     → items + item_genres
  7. app.py                                          → reads all of the above
 ```
 
-Steps 1 through 5 are done. Step 6 is done for movies/TV only. Step 7 is partially built.
+Steps 1 through 5b are done. Step 6 is done for movies/TV only. Step 7 is partially built.
 
 The ordering is enforced by foreign keys, not by convention. `mood_genre_mapping` has FKs to both `moods` and `genres`, so step 5 physically cannot run before steps 2 and 3. `item_genres` has an FK to `genres`, so a harvest can't link an item to a genre that was never seeded.
 
 ## The runner scripts
 
-`run_schema.py`, `run_seed.py`, `run_expand_genres.py`, and `run_mapping.py` are four near-identical scripts. Each one exists because the Aiven database is remote and SSL-required, so applying a `.sql` file isn't as simple as opening it in a local client.
+`run_schema.py`, `run_seed.py`, `run_expand_genres.py`, `run_mapping.py`, and `run_add_other_music_genre.py` are near-identical scripts. Each one exists because the Aiven database is remote and SSL-required, so applying a `.sql` file isn't as simple as opening it in a local client.
 
 They all do the same four things:
 
@@ -47,14 +48,15 @@ Each runner catches exactly one MySQL error and treats it as "already done":
 | `run_seed.py` | `ER_DUP_ENTRY` | Skips rows already seeded, continues |
 | `run_expand_genres.py` | `ER_DUP_ENTRY` | Skips rows already seeded, continues |
 | `run_mapping.py` | `ER_DUP_ENTRY` | Skips mapping rows already present, continues |
+| `run_add_other_music_genre.py` | `ER_DUP_ENTRY` | Skips mapping rows already present; genre insert uses `WHERE NOT EXISTS` |
 
-Any other error is re-raised and stops the run. So all four are safe to re-run: they'll skip what exists and apply what's new. This is what makes `expand_genres.sql` safe to fire at a database that already has the first 38 genres, and what will make the queued 74 Brain rows safe to add to the existing 46.
+Any other error is re-raised and stops the run. So all five are safe to re-run: they'll skip what exists and apply what's new. This is what makes `expand_genres.sql` safe to fire at a database that already has the first 38 genres, and what will make the queued 74 Brain rows safe to add to the existing mappings.
 
 The duplicate-skipping relies on the UNIQUE and PRIMARY KEY constraints in the schema doing the real work — `UNIQUE (media_type, external_id)` on `genres` and the composite `PRIMARY KEY (mood_id, genre_id)` on `mood_genre_mapping`. The runners just decline to panic when those constraints fire.
 
 ## `check_table.py`
 
-A small verification script. It connects and prints row counts for `moods` and `genres` — nothing else. It's the quick sanity check after running the seed and expansion steps: expect `moods: 5` and `genres: 63`.
+A small verification script. It connects and prints row counts for `moods` and `genres` — nothing else. It's the quick sanity check after running the seed and expansion steps: expect `moods: 5` and `genres: 64`.
 
 It does not cover `mood_genre_mapping`, `items`, `item_genres`, or `feedback`, so confirming those counts currently means querying by hand.
 

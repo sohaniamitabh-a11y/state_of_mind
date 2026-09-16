@@ -3,17 +3,21 @@ harvest_music.py
 ------------------
 DEVICE 3's job in the 3-device midnight harvest: Deezer only (music).
 
-IMPORTANT HONEST FLAG, carried over from earlier project notes: Deezer's
-track objects don't include genre directly -- genre lives on the ALBUM,
-which means one extra API call per track (fetching /album/{id}) to get
-at it. This script does that extra call, but Deezer's genre id/name
-list was never independently verified as reliable in this project
-(automated fetching of their full genre list was blocked earlier), so
-genre-matching here is done by NAME against your genres table and will
-silently skip a track's genre link if no name match is found, rather
-than guessing. Expect some tracks to land in `items` with zero rows in
-item_genres until this gap gets revisited -- that's a known limitation,
-not a bug in this script.
+IMPORTANT HONEST FLAG: Deezer's track objects don't include genre
+directly -- genre lives on the ALBUM, which means one extra API call
+per track (fetching /album/{id}) to get at it. This script does that
+extra call. Genre matching is still by NAME against the music rows in
+`genres` (Deezer has no fixed ID taxonomy we seed against), but near-
+miss Deezer names are remapped through GENRE_ALIASES first, and if a
+track ends up with zero linked genres it falls back to the curated
+"Other" bucket so the mood → genre → item join can still reach it.
+Individual unmatched names are still silently skipped when at least
+one other name on the same track matched -- we only invent the Other
+link when nothing matched at all.
+
+Requires `add_other_music_genre.sql` to have been applied (via
+`run_add_other_music_genre.py`) so the Other genre and its Brain rows
+exist before this harvester runs.
 
 SETUP:
     pip install requests mysql-connector-python python-dotenv
@@ -43,6 +47,15 @@ DB_CONFIG = {
     "user": os.getenv("DB_USER", "root"),
     "password": os.getenv("DB_PASSWORD", ""),
     "database": "state_of_mind",
+}
+
+# Deezer name (normalized) → curated genres.name. Exact matches are
+# tried first; this only covers clear near-misses from Deezer's list.
+GENRE_ALIASES = {
+    "dance": "Dance/EDM",
+    "rap/hip hop": "Rap/Hip-Hop",
+    "jazz": "Jazz/Acoustic",
+    "electro": "Techno",
 }
 
 
@@ -126,24 +139,62 @@ def upsert_item(connection, deezer_id, title, popularity, metadata_json):
     return item_id
 
 
+def normalize_genre_name(name):
+    """Lowercase, strip, collapse internal whitespace for alias lookup."""
+    return " ".join(name.lower().strip().split())
+
+
 def link_item_genres(connection, internal_item_id, genre_names):
     cursor = connection.cursor()
+    matched_any = False
+
     for name in genre_names:
         cursor.execute(
             "SELECT id FROM genres WHERE media_type = 'music' AND name = %s",
             (name,),
         )
         row = cursor.fetchone()
+
         if row is None:
-            # Expected to happen often right now -- Deezer's genre
-            # vocabulary doesn't line up 1:1 with your 10 curated music
-            # genre names. Skipping rather than guessing a match.
+            aliased = GENRE_ALIASES.get(normalize_genre_name(name))
+            if aliased is not None:
+                cursor.execute(
+                    "SELECT id FROM genres WHERE media_type = 'music' AND name = %s",
+                    (aliased,),
+                )
+                row = cursor.fetchone()
+
+        if row is None:
+            # Unmatched individual name -- skip silently when another
+            # name on this track already matched (or will). Only the
+            # zero-match case below falls back to Other.
             continue
 
         cursor.execute(
             "INSERT IGNORE INTO item_genres (item_id, genre_id) VALUES (%s, %s)",
             (internal_item_id, row[0]),
         )
+        matched_any = True
+
+    # Fallback: track had genre names but none mapped to a curated
+    # bucket -- link Other so it stays reachable from the Brain join.
+    if not matched_any and genre_names:
+        cursor.execute(
+            "SELECT id FROM genres WHERE media_type = 'music' AND name = %s",
+            ("Other",),
+        )
+        other_row = cursor.fetchone()
+        if other_row is None:
+            print(
+                "[music] Warning: no 'Other' music genre row -- "
+                "run add_other_music_genre.sql before harvesting"
+            )
+        else:
+            cursor.execute(
+                "INSERT IGNORE INTO item_genres (item_id, genre_id) VALUES (%s, %s)",
+                (internal_item_id, other_row[0]),
+            )
+
     connection.commit()
     cursor.close()
 

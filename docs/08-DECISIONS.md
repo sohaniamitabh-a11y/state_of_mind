@@ -112,7 +112,17 @@ If an incoming genre can't be matched to an existing row in `genres`, the harves
 
 **Why:** a genre row with no `mood_genre_mapping` score is invisible to the recommendation engine anyway — the join can't reach items tagged with it. Auto-creating genres would grow the catalog with rows that do nothing while making it look like coverage exists. Skipping keeps `genres` aligned with what's actually been rated, and the printed warnings surface the gap honestly.
 
-**The visible consequence:** `harvest_music.py` matches Deezer genres **by name**, and Deezer's vocabulary doesn't line up with the ten hand-curated music buckets, so a meaningful number of tracks will land in `items` with no genre links at all and never be recommended. That's a known and accepted limitation, documented in the script's own header, rather than papered over with a guessed match.
+**Music exception that still obeys the rule:** `harvest_music.py` does not invent genre rows at harvest time. Near-miss Deezer names are remapped through a fixed alias table onto the curated buckets, and when a track matches none of them it links the pre-seeded `Other` genre (added by `add_other_music_genre.sql`, with Brain rows at relevance `0.25` for every mood). Individual unmatched names are still skipped when another name on the same track already matched. See [04-HARVESTERS.md](04-HARVESTERS.md).
+
+---
+
+## Deezer aliases + fallback `Other` over importing the full Deezer genre list
+
+**Decision:** keep the eleven curated music buckets (ten originals + `Other`), alias clear near-misses in code, and fall back to `Other` when nothing matches.
+
+**Why:** importing Deezer's full primary list (27+) would mean hand-curating dozens of new mood scores and diluting the small, rated vocabulary the Brain is built on. Exact-name matching alone was losing a large share of tracks from the recommendation join. Aliases recover the near-misses (`Dance` / `Rap/Hip Hop` / `Jazz` / `Electro`); `Other` at low relevance keeps the rest recommendable without pretending they fit a specific curated bucket.
+
+**The cost accepted:** `Other` is less specific than a real genre, and tracks that land there will surface under every mood at the same low weight. That is preferable to silent disappearance. Revisit if survey ratings later justify expanding the music catalog.
 
 ---
 
@@ -131,7 +141,7 @@ If an incoming genre can't be matched to an existing row in `genres`, the harves
 
 ## Runner scripts strip comments before splitting on semicolons
 
-The four `run_*.py` scripts drop every blank line and every line starting with `--`, then split the remainder on `;`.
+The four `run_*.py` scripts (plus `run_add_other_music_genre.py`) drop every blank line and every line starting with `--`, then split the remainder on `;`.
 
 **Why:** splitting a `.sql` file on semicolons breaks as soon as a comment contains one, or a comment block gets glued to the front of the following statement. Stripping comments first makes the naive split safe. And the split is necessary at all because these files have to be applied to a remote SSL-required Aiven instance rather than opened in a local client.
 
@@ -168,6 +178,6 @@ The shipped design asks the user their mood directly, with five buttons. `schema
 Not decisions yet — things consciously left unresolved.
 
 - **Whether to migrate off RAWG.** Deferred above; forced if the key never materialises.
-- **How to reconcile Deezer's genre vocabulary** with the ten curated music buckets. Currently unmatched genres are skipped.
 - **Whether `feedback` ever gets wired up.** The table exists and is empty; there's no feedback loop and the Brain doesn't learn.
 - **Whether the harvesters should pass SSL parameters** like every other script does. `harvest_movies_tv.py` works without them, but the inconsistency should be settled before other devices come online. See [04-HARVESTERS.md](04-HARVESTERS.md).
+- **Whether to expand the music catalog beyond aliases + Other** if survey ratings later justify more Deezer-aligned buckets.
