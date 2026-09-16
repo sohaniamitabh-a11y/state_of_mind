@@ -26,6 +26,8 @@ SETUP:
         DB_PORT=3306
         DB_USER=your_cloud_db_user
         DB_PASSWORD=your_cloud_db_password
+        DB_NAME=state_of_mind
+        DB_SSL_CA=./ignore/ca.pem
     (Deezer's public chart/album endpoints don't require an API key for
     read-only access at the time this was written -- if that's changed,
     you'll see a 401/403 from requests.raise_for_status() below and
@@ -46,7 +48,9 @@ DB_CONFIG = {
     "port": int(os.getenv("DB_PORT", "3306")),
     "user": os.getenv("DB_USER", "root"),
     "password": os.getenv("DB_PASSWORD", ""),
-    "database": "state_of_mind",
+    "database": os.getenv("DB_NAME", "state_of_mind"),
+    "ssl_ca": os.getenv("DB_SSL_CA"),
+    "ssl_verify_cert": True,
 }
 
 # Deezer name (normalized) → curated genres.name. Exact matches are
