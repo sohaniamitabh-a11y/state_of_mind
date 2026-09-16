@@ -38,7 +38,7 @@ Per-device API key:
 | Device / role | Key needed |
 |---|---|
 | Movies/TV (this device) | `TMDB_API_KEY` |
-| Games (Windows teammate) | `RAWG_API_KEY` — **not yet obtained**, rawg.io signup has been unreliable |
+| Games (Windows teammate) | `RAWG_API_KEY` — obtained; first live harvest completed |
 | Music (MacBook teammate) | none — Deezer's public read endpoints need no key |
 
 Nobody needs all three. One API per device is deliberate — see [04-HARVESTERS.md](04-HARVESTERS.md).
@@ -91,8 +91,8 @@ Try it with `GET /get-state?mood=Happy/Excitement`. Note that the mood must matc
 
 ```
 python harvest_movies_tv.py     # tested and working
-python harvest_games.py         # needs RAWG_API_KEY, never run for real
-python harvest_music.py         # no key needed, never run for real
+python harvest_games.py         # needs RAWG_API_KEY; live run done (warns on missing action slug)
+python harvest_music.py         # no key needed; live run done (Other fallback available)
 ```
 
 Each runs once and exits. There's no internal loop.

@@ -42,17 +42,15 @@ There's a second, more practical reason not to blend them: `popularity_score` is
 
 ---
 
-## RAWG kept over IGDB, despite the reliability problems
+## RAWG kept over IGDB, despite earlier signup friction
 
-RAWG has been the weak link — the rawg.io signup flow has been unreliable enough that the API key still hasn't been obtained, which is why `harvest_games.py` has never run for real. IGDB was considered as a replacement.
+RAWG was the weak link while the rawg.io signup flow blocked the API key and `harvest_games.py` had never run. IGDB was considered as a replacement. The key is now available and a live harvest has run.
 
 **Decision: stay on RAWG for now. Deferred, not settled.**
 
-**Why:** RAWG's genre slugs aren't confined to the harvester. They're baked in as `external_id` values across three separate SQL files — the initial seed, the genre expansion, and the mapping inserts that resolve `genre_id` by looking those slugs up. Switching to IGDB would mean remapping every game genre identifier across all three, and any `mood_genre_mapping` row whose subquery no longer resolves would fail to insert. That's a disruptive change to make while the games pipeline hasn't produced a single row yet, and while the rating survey for the expanded genre list is still outstanding.
+**Why:** RAWG's genre slugs aren't confined to the harvester. They're baked in as `external_id` values across three separate SQL files — the initial seed, the genre expansion, and the mapping inserts that resolve `genre_id` by looking those slugs up. Switching to IGDB would mean remapping every game genre identifier across all three, and any `mood_genre_mapping` row whose subquery no longer resolves would fail to insert.
 
-The trade being accepted: a known-annoying signup process, versus a coordinated three-file migration plus re-verification of the game rows in the Brain. For now, the annoyance is cheaper.
-
-Worth revisiting if the key genuinely can't be obtained — at that point the migration cost stops being avoidable.
+**The cost, now visible in production data:** the seeded game list omitted `action`, which RAWG uses heavily. The first harvest logged 17 misses for that slug and left four games with zero genre links. Fixing that is a small data/`data:` change (genre row + Brain mappings), not a reason to switch APIs — but it does mean staying on RAWG still requires keeping the slug catalog honest.
 
 ---
 
@@ -84,7 +82,7 @@ Three harvesters, each hitting exactly one source, each assigned to one teammate
 
 **Why:** it keeps memory and connection load light on any single student laptop, and it isolates failures — a bad key or an outage on one device doesn't take the other two harvests down. It also means no single machine holds more than one API key.
 
-**The cost, currently very visible:** the system's completeness is gated on teammate onboarding. Because the other two devices aren't set up yet, `items` contains movies and TV only, and the backend's bucketing work has no real music or games data to test against.
+**The cost, previously very visible:** while only movies/TV had been harvested, the backend's bucketing work had no real music or games data to test against. A live Aiven harvest has since added both; the remaining games gap is genre coverage (`action`), not empty `items`.
 
 ---
 
@@ -177,8 +175,9 @@ The shipped design asks the user their mood directly, with five buttons. `schema
 
 Not decisions yet — things consciously left unresolved.
 
-- **Whether to migrate off RAWG.** Deferred above; forced if the key never materialises.
+- **Whether to migrate off RAWG.** Deferred above; less urgent now that a live harvest works, but still open if slug-catalog drift keeps biting.
 - **Whether `feedback` ever gets wired up.** The table exists and is empty; there's no feedback loop and the Brain doesn't learn.
+- **Whether to add the missing RAWG `action` genre** (and Brain mappings) so action-tagged games stop harvesting as orphans.
 - **Whether to expand the music catalog beyond aliases + Other** if survey ratings later justify more Deezer-aligned buckets.
 
 ---

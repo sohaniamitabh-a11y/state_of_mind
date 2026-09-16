@@ -28,14 +28,14 @@ New moods, new genres, and entirely new media domains are added as new **rows**,
 - 5 moods
 - 64 genres (11 music, including fallback `Other`)
 - 51 `mood_genre_mapping` rows (46 original + 5 for music `Other`; a further 74 rows are queued, waiting on the genre-expansion survey ratings to come back)
-- 40 items, all movies and TV only
-- `item_genres` populated from those 40 items
+- 70 items (20 movie, 20 tv, 20 game, 10 music)
+- `item_genres` at 119 links from those items
 - `feedback` — empty and unused; the table exists but nothing writes to it
 
 **Component detail:**
 
 - **Brain:** done and live. The original 46 mapping rows came from the first round of ratings; five more map music `Other` to every mood at low relevance so unmatched Deezer tracks stay recommendable.
-- **Harvester:** `harvest_movies_tv.py` is tested and working — it's what produced the 40 items. `harvest_games.py` and `harvest_music.py` are written but have never been run for real. Games is blocked on a RAWG API key (rawg.io signup has been unreliable). Music needs no key at all — Deezer's public endpoints are open — it simply hasn't been run yet.
+- **Harvester:** all three have run against live Aiven. Movies/TV remain the original 40. Games harvested 20 RAWG titles but warn on missing `action` slug (4 games ended with zero genre links). Music harvested 10 Deezer chart tracks; one fell back to `Other`.
 - **Backend:** stage 4 of 7 is complete. The full mood → genre → items join is wired into the live `/get-state` route, but it returns raw duplicated rows. Stage 5 is in progress: the dedupe logic is written and tested inside `test_query.py` but has **not** been merged into `app.py`, and the bucketing into `movies_tv` / `music` / `games` plus the top-5-per-bucket cap hasn't been started.
 - **Frontend:** not started.
 
@@ -47,7 +47,7 @@ A 3-person college project. One harvester is assigned per teammate and per devic
 - Games → the Windows teammate
 - Music → the MacBook teammate
 
-Teammates haven't finished onboarding yet, so the current developer is working solo in the meantime. This is why only the movies/TV harvester has ever run against the real database.
+Teammates haven't finished onboarding yet, so the current developer is working solo in the meantime. A one-off live harvest has since populated games and music as well as movies/TV.
 
 ## Reading order
 

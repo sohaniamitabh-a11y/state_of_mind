@@ -9,8 +9,8 @@ Cloud-hosted Aiven MySQL, database name `state_of_mind`, SSL required. Defined i
 | `moods` | 5 | Complete; the five moods are fixed |
 | `genres` | 64 | Complete for the four current media types (includes music `Other`) |
 | `mood_genre_mapping` | 51 | 46 original + 5 for music `Other`; 74 more rows still queued on genre-expansion ratings |
-| `items` | 40 | Movies and TV only — no games or music harvested yet |
-| `item_genres` | populated from those 40 items | |
+| `items` | 70 | 20 movie, 20 tv, 20 game, 10 music |
+| `item_genres` | 119 | From those 70 items |
 | `feedback` | 0 | Schema exists, nothing reads or writes it |
 
 ## Table 1 — `moods`
@@ -119,7 +119,7 @@ One table for every harvested thing — a film, a show, a game, a track, and lat
 
 `UNIQUE (media_type, external_id)` is what makes the harvesters idempotent. Re-running a harvest tomorrow updates the existing row instead of inserting a duplicate.
 
-Currently 40 rows, all `'movie'` and `'tv'`.
+Currently 70 rows: 20 `'movie'`, 20 `'tv'`, 20 `'game'`, 10 `'music'`.
 
 ## Table 5 — `item_genres`
 
@@ -133,7 +133,7 @@ FOREIGN KEY (genre_id) REFERENCES genres(id)
 
 A junction table, because one film is genuinely both Action and Comedy at once. This is also the direct cause of the duplicate rows the backend has to dedupe: an item tagged with three genres that all score against the requested mood comes back from the join three times.
 
-Populated from the 40 harvested movie/TV items.
+Populated from the 70 harvested items (119 links).
 
 ## Table 6 — `feedback`
 

@@ -6,11 +6,11 @@ Three standalone scripts that fill the `items` and `item_genres` cache. Each one
 
 | Script | Source | Device | Status |
 |---|---|---|---|
-| `harvest_movies_tv.py` | TMDB | This device | **Tested and working.** Produced the 40 items currently in the database |
-| `harvest_games.py` | RAWG | Windows teammate | **Written, never run for real.** Blocked on a RAWG API key — rawg.io signup has been unreliable |
-| `harvest_music.py` | Deezer | MacBook teammate | **Written, never run for real.** Not blocked on anything — Deezer's public endpoints need no key — simply untested |
+| `harvest_movies_tv.py` | TMDB | This device | **Tested and working.** Produced the original 40 movie/TV items |
+| `harvest_games.py` | RAWG | Windows teammate | **Run against live Aiven.** Inserted 20 games; warns heavily on missing `action` slug (4 games linked to zero genres) |
+| `harvest_music.py` | Deezer | MacBook teammate | **Run against live Aiven.** Inserted 10 chart tracks; aliases + `Other` fallback in use (1 track linked to `Other`) |
 
-Teammates haven't finished onboarding, so in practice only the movies/TV harvester has ever executed against the live database. That's why `items` contains movies and TV only.
+A one-off live harvest populated all four media types. Scheduled per-device midnight runs are still the intended steady state.
 
 ## The shared design
 
@@ -42,7 +42,7 @@ Requires `TMDB_API_KEY` in `.env`, and raises immediately at startup if it's mis
 
 ## `harvest_games.py` — RAWG
 
-**Blocked: no RAWG API key yet.** The rawg.io signup flow has been unreliable, so this script has never made a real request. The code is complete and raises immediately if `RAWG_API_KEY` is absent.
+**Run against live Aiven** with a working `RAWG_API_KEY`. Raises immediately if the key is absent.
 
 Hits `https://api.rawg.io/api/games` with `ordering=-added` and `page_size=20`.
 
@@ -53,13 +53,13 @@ Per-item handling:
 - **Popularity:** RAWG exposes no single 0–100 popularity field. `game["added"]` — how many users have the game in a list — is the closest equivalent and is what fills `popularity_score`. So `popularity_score` is not comparable across media types; it's a raw count here and a TMDB float in the movies branch.
 - **Genres:** RAWG puts genre **slugs** directly on each game, and those are the same slugs already used as `external_id` in `genres`. No numeric-ID translation step is needed, unlike the TMDB branch.
 
-When a game arrives with a slug outside the seeded game genres, the script warns and skips the link.
+When a game arrives with a slug outside the seeded game genres, the script warns and skips the link. The live catalog is **missing `action`** — the first harvest logged 17 warnings for that slug alone, and four games (including GTA V and RDR2) ended with zero `item_genres` rows because `action` was their only (or only unmatched) tag.
 
-RAWG's reliability problems were weighed against switching to IGDB and RAWG was kept — see [08-DECISIONS.md](08-DECISIONS.md) for why.
+RAWG was kept over IGDB earlier despite signup friction — see [08-DECISIONS.md](08-DECISIONS.md). The open gap now is the missing `action` genre row (and Brain mapping), not the API key.
 
 ## `harvest_music.py` — Deezer
 
-**Written but never run.** Nothing blocks it: Deezer's public chart and album endpoints require no API key for read-only access, so this script has no key check at all and connects straight to the database. It just hasn't been executed for real yet.
+**Run against live Aiven.** Deezer's public chart and album endpoints require no API key for read-only access, so this script has no key check and connects straight to the database.
 
 Hits `https://api.deezer.com/chart/0/tracks` for the chart, then `https://api.deezer.com/album/{id}` once per track.
 
