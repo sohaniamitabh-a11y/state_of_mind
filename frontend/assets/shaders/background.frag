@@ -5,9 +5,9 @@ uniform float uTime;
 
 out vec4 fragColor;
 
-const vec3 kColorA = vec3(0.043, 0.055, 0.090);
-const vec3 kColorB = vec3(0.078, 0.024, 0.110);
-const vec3 kColorC = vec3(0.012, 0.086, 0.098);
+const vec3 kColorA = vec3(0.060, 0.080, 0.400);
+const vec3 kColorB = vec3(0.360, 0.050, 0.120);
+const vec3 kColorC = vec3(0.030, 0.380, 0.220);
 
 float hash(vec2 p) {
   p = fract(p * vec2(123.34, 456.21));
@@ -47,7 +47,7 @@ void main() {
   vec3 color = kColorA * w1 + kColorB * w2 + kColorC * w3;
 
   float g = grain(FlutterFragCoord().xy + fract(uTime) * 97.0) - 0.5;
-  color += g * 0.025;
+  color += g * 0.04;
 
   fragColor = vec4(color, 1.0);
 }
