@@ -38,13 +38,14 @@ class Mood {
 
   final String description;
 
-  /// Top stop of the card's glow-bar gradient.
+  /// Top stop of the card's gradient border.
   final Color gradientStart;
 
-  /// Bottom stop of the card's glow-bar gradient.
+  /// Bottom stop of the card's gradient border.
   final Color gradientEnd;
 
-  /// Color of the blurred box-shadow behind the glow bar.
+  /// Color of the soft aura around the bordered card (and the hero
+  /// hover wash, which reuses the same five mood colors).
   final Color glowColor;
 }
 

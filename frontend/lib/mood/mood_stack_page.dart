@@ -1,8 +1,10 @@
+import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import 'hero_prompt.dart';
 import 'mood.dart';
 import 'mood_card.dart';
 
@@ -29,8 +31,10 @@ import 'mood_card.dart';
 /// scroll offset here is a plain tracked value driven manually by
 /// [Listener.onPointerSignal] (mouse wheel / trackpad) and
 /// [GestureDetector.onVerticalDragUpdate] (touch drag) — not an actual
-/// Flutter `Scrollable`. Card positions, scale, and the hero hint's
-/// opacity are all recomputed from that one value on every change.
+/// Flutter `Scrollable`. Card positions, scale, the hero hint's opacity,
+/// and the scroll wobble are all recomputed from that one value on every
+/// change — there is no extra ticker for the wobble, on purpose (see
+/// [_wobbleFor]).
 class MoodStackPage extends StatefulWidget {
   const MoodStackPage({super.key, required this.onMoodSelected});
 
@@ -69,6 +73,22 @@ class _MoodStackPageState extends State<MoodStackPage> {
   static double _rangeStartFor(int index, int cardCount) =>
       index / cardCount;
 
+  /// Tiny, GPU-composited wobble driven purely by the current scroll
+  /// offset. Amplitude is ~0.7° of rotation and ~4px of horizontal
+  /// translation — small enough that a dropped frame is invisible, which
+  /// is the whole point of not introducing a second ticker (the shader
+  /// background already owns one, isolated in its own [RepaintBoundary]).
+  ///
+  /// Per-card phase so the stack doesn't tilt in lockstep. Rest pose is
+  /// whatever `sin(offset)` lands on, but at this amplitude that's
+  /// visually a flat card.
+  static ({double angle, double dx}) _wobbleFor(int index, double offset) {
+    final angle =
+        math.sin(offset * 0.014 + index * 0.85) * 0.012; // radians
+    final dx = math.sin(offset * 0.011 + index * 0.55) * 4.0;
+    return (angle: angle, dx: dx);
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
@@ -105,36 +125,7 @@ class _MoodStackPageState extends State<MoodStackPage> {
             clipBehavior: Clip.hardEdge,
             children: [
               Positioned.fill(
-                child: IgnorePointer(
-                  child: Opacity(
-                    opacity: heroOpacity,
-                    child: const Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'How do you feel right now?',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 12),
-                          Text(
-                            'Scroll to bring up your moods',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 16,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Icon(Icons.keyboard_arrow_down, color: Colors.white70),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+                child: HeroPrompt(opacity: heroOpacity),
               ),
               for (var i = 0; i < cardCount; i++)
                 _buildCard(
@@ -180,6 +171,7 @@ class _MoodStackPageState extends State<MoodStackPage> {
     final enterTop = viewportHeight + 40; // fully below the visible area
     final top = lerpDouble(enterTop, pinnedTop, localProgress)!;
     final left = (viewportWidth - MoodCard.width) / 2;
+    final wobble = _wobbleFor(index, _scrollOffset);
 
     return Positioned(
       top: top,
@@ -187,7 +179,16 @@ class _MoodStackPageState extends State<MoodStackPage> {
       child: Transform.scale(
         scale: scale,
         alignment: Alignment.topCenter, // CSS `origin-top` equivalent
-        child: MoodCard(mood: mood, onTap: () => widget.onMoodSelected(mood)),
+        child: Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.identity()
+            ..translateByDouble(wobble.dx, 0.0, 0.0, 1.0)
+            ..rotateZ(wobble.angle),
+          child: MoodCard(
+            mood: mood,
+            onTap: () => widget.onMoodSelected(mood),
+          ),
+        ),
       ),
     );
   }

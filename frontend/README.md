@@ -1,17 +1,25 @@
 # State of Mind — Frontend
 
-Minimal Flutter app containing only the animated shader background. No other
-UI (no buttons, no navigation, no Rive) has been added yet — this is a
-bootstrap so the frontend exists and runs.
+Flutter app for the mood-based recommendation picker. Kept fully separate
+from the Python/SQL backend at the repo root — this package talks to a
+swappable `ResultsRepository`, and the only implementation today is static
+sample data.
 
 ## What's here
 
-- `lib/main.dart` — a bare `MaterialApp` (dark theme, no app bar) whose home
-  screen is just `ShaderBackground()`, full-screen.
-- `lib/shader_background.dart` — loads the fragment shader and repaints it
-  every frame via a `Ticker`.
-- `assets/shaders/background.frag` — the animated background shader (GLSL,
-  compiled by Flutter's shader compiler at build time).
+- `lib/main.dart` — `MaterialApp` (dark theme, no app bar) whose home is
+  `HomeShell`: a `ShaderBackground` behind a foreground that swaps between
+  the mood picker and the results page. The background stays mounted the
+  whole time (an opaque `Navigator.push` would hide it).
+- `lib/background/shader_background.dart` + `assets/shaders/background.frag`
+  — the animated background shader, isolated in its own `RepaintBoundary`.
+- `lib/mood/` — the five mood cards and the stacking-scroll picker.
+  Cards use a mood-colored gradient border (no skewed glow strips). While
+  the user scrolls, each card gets a tiny GPU-composited wobble derived
+  from the scroll offset — no extra ticker. Landing copy is oversized
+  frosted-glass type that picks up the five mood colors on hover.
+- `lib/results/` — `ResultsRepository` interface + `StaticResultsRepository`
+  (Vercel-shaped sample data) and the results page.
 
 ## Prerequisites
 
