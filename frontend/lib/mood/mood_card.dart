@@ -5,15 +5,22 @@ import 'package:flutter/material.dart';
 import 'mood.dart';
 
 /// One mood-picker card: a frosted-glass panel with a mood-colored
-/// gradient border.
+/// gradient *stroke* (not a filled slab).
 ///
 /// Earlier this matched the live Vercel reference exactly — a skewed
-/// red/green/blue/yellow glow strip behind the glass. Those strips
-/// read as disoriented while the stacking-scroll transform was moving
-/// the cards (the skew fought the rise/pin motion). They were replaced
-/// with a 2px gradient border in the same mood colors, plus a small
-/// hover scale. The stacking-scroll rise/pin/shrink transform is still
-/// applied by the caller (`MoodStackPage`), not here.
+/// glow strip behind the glass. Those strips read as disoriented while
+/// the stacking-scroll transform was moving the cards. They were
+/// replaced with a 2px gradient border in the same mood colors.
+///
+/// The border is painted as a stroke in front of the glass, not as a
+/// gradient-filled parent with a translucent child sitting on top of
+/// it. The parent-fill trick looks fine when the child is opaque, but
+/// with real glass the parent's gradient shows through the whole panel
+/// and the card reads as a solid orange/cyan/etc. slab — which is the
+/// thing we were trying to get rid of.
+///
+/// The stacking-scroll rise/pin/shrink transform is applied by the
+/// caller (`MoodStackPage`), not here.
 class MoodCard extends StatefulWidget {
   const MoodCard({super.key, required this.mood, required this.onTap});
 
@@ -33,7 +40,7 @@ class _MoodCardState extends State<MoodCard> {
   @override
   Widget build(BuildContext context) {
     final mood = widget.mood;
-    final borderWidth = _hovered ? 2.5 : 2.0;
+    final strokeWidth = _hovered ? 2.5 : 2.0;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -45,40 +52,40 @@ class _MoodCardState extends State<MoodCard> {
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOut,
           scale: _hovered ? 1.03 : 1.0,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 280),
-            curve: Curves.easeOut,
+          child: Container(
             width: MoodCard.width,
             height: MoodCard.height,
-            padding: EdgeInsets.all(borderWidth),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [mood.gradientStart, mood.gradientEnd],
-              ),
               boxShadow: [
                 BoxShadow(
                   color: mood.glowColor.withValues(
-                    alpha: _hovered ? 0.38 : 0.20,
+                    alpha: _hovered ? 0.32 : 0.16,
                   ),
-                  blurRadius: _hovered ? 20 : 12,
-                  spreadRadius: -6,
+                  blurRadius: _hovered ? 18 : 10,
+                  spreadRadius: -4,
                 ),
               ],
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(14),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-                child: ColoredBox(
-                  color: Colors.white.withValues(
-                    alpha: _hovered ? 0.10 : 0.055,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: _CardBody(mood: mood, hovered: _hovered),
+            child: CustomPaint(
+              foregroundPainter: _GradientBorderPainter(
+                start: mood.gradientStart,
+                end: mood.gradientEnd,
+                radius: 16,
+                strokeWidth: strokeWidth,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                  child: ColoredBox(
+                    color: Colors.white.withValues(
+                      alpha: _hovered ? 0.10 : 0.055,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: _CardBody(mood: mood, hovered: _hovered),
+                    ),
                   ),
                 ),
               ),
@@ -88,6 +95,47 @@ class _MoodCardState extends State<MoodCard> {
       ),
     );
   }
+}
+
+/// Strokes a rounded-rect gradient border. Stroke-only so a translucent
+/// glass child never composites against a filled gradient.
+class _GradientBorderPainter extends CustomPainter {
+  const _GradientBorderPainter({
+    required this.start,
+    required this.end,
+    required this.radius,
+    required this.strokeWidth,
+  });
+
+  final Color start;
+  final Color end;
+  final double radius;
+  final double strokeWidth;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final rrect = RRect.fromRectAndRadius(
+      rect.deflate(strokeWidth / 2),
+      Radius.circular(radius),
+    );
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..shader = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [start, end],
+      ).createShader(rect);
+    canvas.drawRRect(rrect, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _GradientBorderPainter old) =>
+      old.start != start ||
+      old.end != end ||
+      old.radius != radius ||
+      old.strokeWidth != strokeWidth;
 }
 
 class _CardBody extends StatelessWidget {
