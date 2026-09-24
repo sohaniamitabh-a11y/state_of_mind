@@ -21,6 +21,18 @@ The history has **not** been rewritten. Rewriting published history means force-
 | `28c5678` | 2026-08-08 | Add updated README with project overview and progress | Added `readme.md` (lowercase) — a fresh 81-line README, since the uppercase one had been deleted in the previous commit |
 | `7cca761` | 2026-08-11 | uncopy logic to remove duplicate tuples | Added the dedupe logic to `test_query.py`, **and** added `.gitignore` — the file the previous-but-one commit's message had claimed |
 
+## What landed after that
+
+The table above stops at the last noisy commit. Later work on `main` uses the message format in [CONTRIBUTING.md](../CONTRIBUTING.md). The pieces that changed the documented state of the project:
+
+| Commit | What it did |
+|---|---|
+| `d6f8ea4` | Merged the `/docs` set and the rewritten README |
+| `a47837d` | Added `docs/architecture-baseline.docx` |
+| `92583c7` | Added music genre `Other` and five Brain rows at relevance `0.25` (`add_other_music_genre.sql`, `run_add_other_music_genre.py`) |
+| `9bb1e88` | `harvest_music.py` aliases near-miss Deezer names and falls back to `Other` when a track matches nothing |
+| `1166f68` | Backend stage 5 in `app.py`: dedupe by item id, bucket into `movies_tv` / `music` / `games`, cap at 5, return JSON |
+
 ## What the noise actually costs
 
 Worth being concrete, because these aren't cosmetic complaints:

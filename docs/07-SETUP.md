@@ -89,7 +89,7 @@ python app.py
 
 Serves on Flask's development server with `debug=True` (auto-reload, interactive debugger). Development-only.
 
-Try it with `GET /get-state?mood=Happy/Excitement`. Note that the mood must match a `moods.name` value exactly, and that the response today is raw duplicated rows in an f-string rather than JSON — see [05-BACKEND.md](05-BACKEND.md).
+Try it with `GET /get-state?mood=Happy/Excitement`. The mood must match a `moods.name` value exactly. The response is JSON with `movies_tv`, `music`, and `games`, each capped at 5. A mood that doesn't match currently returns HTTP 200 and three empty lists — the 404 is stage 6 and is not built yet. See [05-BACKEND.md](05-BACKEND.md).
 
 **A harvest, manually:**
 
@@ -109,7 +109,7 @@ Each runs once and exits. There's no internal loop.
 python test_query.py
 ```
 
-Runs the same join as `/get-state` with the mood hardcoded to `Happy/Excitement`, then applies the stage-5 dedupe logic and prints the result. This is where that dedupe currently lives — it hasn't been merged into `app.py` yet.
+Runs the same join with the mood hardcoded to `Happy/Excitement`, then dedupes by **title** and prints a dict. This was the prototype. The live dedupe is `remove_duplicates()` in `app.py`, which keys on item id, buckets, caps at 5, and returns JSON. Use `/get-state` to see what the API actually serves.
 
 ## Onboarding a teammate
 

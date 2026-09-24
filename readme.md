@@ -66,7 +66,7 @@ Every file, and what it's for. Files are currently flat in the root; nothing has
 | File | Purpose |
 |---|---|
 | `app.py` | The Flask API. Two routes: `/` liveness, and `/get-state?mood=X` which runs the recommendation join |
-| `test_query.py` | Standalone runner for the same join with the mood hardcoded, plus the stage-5 dedupe logic that isn't in `app.py` yet |
+| `test_query.py` | Earlier prototype of the dedupe, keyed on title and printed to the console. The live path is `remove_duplicates()` in `app.py` |
 
 ### Harvesters — one API each, one device each
 
@@ -74,7 +74,7 @@ Every file, and what it's for. Files are currently flat in the root; nothing has
 |---|---|---|
 | `harvest_movies_tv.py` | TMDB trending movies + TV | Tested and working — produced the current 40 items |
 | `harvest_games.py` | RAWG games, ordered by `-added` | Written, never run — no RAWG API key yet |
-| `harvest_music.py` | Deezer chart tracks | Written, never run — needs no key, just untested |
+| `harvest_music.py` | Deezer chart tracks, with name aliases and an `Other` fallback | Written, never run — needs no key |
 
 ### Schema and seed data
 
@@ -153,7 +153,7 @@ If you're setting up a fresh database rather than connecting to the shared one, 
 | [02-DATABASE.md](docs/02-DATABASE.md) | All six tables, column by column, with the genre breakdown |
 | [03-DATA-PIPELINE.md](docs/03-DATA-PIPELINE.md) | The mandatory run order and how the runner scripts work |
 | [04-HARVESTERS.md](docs/04-HARVESTERS.md) | The three collectors, their status and known limitations |
-| [05-BACKEND.md](docs/05-BACKEND.md) | The seven stages, what stage 5 still needs, known rough edges |
+| [05-BACKEND.md](docs/05-BACKEND.md) | The seven stages. Stage 5 is done; stage 6 (404) is next |
 | [06-BRAIN-AND-RATINGS.md](docs/06-BRAIN-AND-RATINGS.md) | Where relevance scores come from and how they're calculated |
 | [07-SETUP.md](docs/07-SETUP.md) | Per-device setup and teammate onboarding |
 | [08-DECISIONS.md](docs/08-DECISIONS.md) | Every significant design decision, its reasoning, and its cost |

@@ -15,7 +15,7 @@ How data actually gets into the database, in the order it has to happen. Everyth
  7. app.py                                          → reads all of the above
 ```
 
-Steps 1 through 5b are done. Step 6 is done for movies/TV only. Step 7 is partially built.
+Steps 1 through 5b are done. Step 6 is done for movies/TV only. Step 7's API is through stage 5 of 7: `/get-state` returns deduped, bucketed, top-5 JSON. Stages 6 (404 on a bad mood) and 7 (standalone API testing) are not started.
 
 The ordering is enforced by foreign keys, not by convention. `mood_genre_mapping` has FKs to both `moods` and `genres`, so step 5 physically cannot run before steps 2 and 3. `item_genres` has an FK to `genres`, so a harvest can't link an item to a genre that was never seeded.
 
@@ -62,7 +62,7 @@ It does not cover `mood_genre_mapping`, `items`, `item_genres`, or `feedback`, s
 
 ## The repeating part: harvests
 
-Once steps 1 through 5 are in place, the only recurring pipeline activity is the harvest. Each of the three scripts runs once per invocation with no internal loop, triggered at midnight by the host OS scheduler on its assigned device — cron on the MacBook, Task Scheduler on Windows. There is no orchestrator, no queue, and no coordination between the three.
+Once steps 1 through 5b are in place, the only recurring pipeline activity is the harvest. Each of the three scripts runs once per invocation with no internal loop, triggered at midnight by the host OS scheduler on its assigned device — cron on the MacBook, Task Scheduler on Windows. There is no orchestrator, no queue, and no coordination between the three.
 
 Because `items` has `UNIQUE (media_type, external_id)` and the harvesters use `INSERT ... ON DUPLICATE KEY UPDATE`, a nightly harvest refreshes `popularity_score` and `harvested_at` on items it has seen before rather than accumulating duplicates. Genre links use `INSERT IGNORE`, so re-linking an existing pair is a no-op.
 
