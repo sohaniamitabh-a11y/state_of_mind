@@ -48,11 +48,11 @@ Status: partial. Details in [04-HARVESTERS.md](04-HARVESTERS.md).
 
 ### 3. The Backend / Engine — `app.py`
 
-A Flask app with two routes: `/` (a liveness string) and `/get-state`. `/get-state` reads a `mood` query parameter, opens a MySQL connection inside the request, runs the four-table join, and returns the result.
+A Flask app with two routes: `/` (a JSON liveness object) and `/get-state`. `/get-state` reads a `mood` query parameter, opens a MySQL connection inside the request, runs the four-table join, then shapes the rows before returning JSON.
 
-The engine holds no recommendation logic of its own beyond the join and the sort order. All the judgement is in the Brain table; the backend just reads it.
+The judgement of which genres fit a mood still lives only in the Brain table. After the join, `app.py` does three mechanical steps: drop duplicate items (keeping the highest relevance), split the remainder into `movies_tv` / `music` / `games`, and keep the top 5 of each bucket.
 
-Status: stage 4 of 7. Details in [05-BACKEND.md](05-BACKEND.md).
+Status: stage 5 of 7. Details in [05-BACKEND.md](05-BACKEND.md).
 
 ### 4. Frontend — planned Flutter app
 
@@ -62,22 +62,31 @@ Status: not started, zero code.
 
 ## The join that is the engine
 
-This is the heart of the read path. It appears in both `test_query.py` and `app.py`:
+This is the heart of the read path, in `app.py`:
 
-```29:36:app.py
-        SELECT items.title, items.media_type, items.popularity_score, mood_genre_mapping.relevance_score
-        FROM moods
-        JOIN mood_genre_mapping ON moods.id = mood_genre_mapping.mood_id
-        JOIN item_genres ON mood_genre_mapping.genre_id = item_genres.genre_id
-        JOIN items ON item_genres.item_id = items.id
-        WHERE moods.name = %s
-        ORDER BY mood_genre_mapping.relevance_score DESC, items.popularity_score DESC
-    """, (mood,))
+```145:161:app.py
+            SELECT
+                items.id,
+                items.title,
+                items.media_type,
+                items.popularity_score,
+                mood_genre_mapping.relevance_score
+            FROM moods
+            JOIN mood_genre_mapping
+                ON moods.id = mood_genre_mapping.mood_id
+            JOIN item_genres
+                ON mood_genre_mapping.genre_id = item_genres.genre_id
+            JOIN items
+                ON item_genres.item_id = items.id
+            WHERE moods.name = %s
+            ORDER BY
+                mood_genre_mapping.relevance_score DESC,
+                items.popularity_score DESC
 ```
 
-Read it left to right: start from the requested mood, walk out to every genre that mood scores against, walk out again to every item tagged with those genres, and sort the result relevance-first with popularity only as a tiebreaker.
+Read it left to right: start from the requested mood, walk out to every genre that mood scores against, walk out again to every item tagged with those genres, and sort the result relevance-first with popularity only as a tiebreaker. `items.id` is selected so the later dedupe can tell two different titles apart.
 
-The join is a chain of many-to-many hops, which is why the raw result contains duplicates — a single film tagged both Action and Thriller comes back once per matching genre. Collapsing that is stage 5's job.
+The join is a chain of many-to-many hops, so the raw result contains duplicates — a single film tagged both Action and Thriller comes back once per matching genre. `remove_duplicates()` collapses those by item id, keeping the row with the higher relevance, before bucketing and the top-5 cap.
 
 ## Storage
 
