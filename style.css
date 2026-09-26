@@ -1,0 +1,611 @@
+:root {
+  /* ========================================================
+     Exact Palette from Swatch:
+     #D77FA0 | #BC5A75 | #A23C4C | #872328 | #6C1610 | #521103
+     + Warm Cream & Red-Amber Specular Accents
+  ======================================================== */
+  --c-rose-muted: #D77FA0;
+  --c-mauve-dusty: #BC5A75;
+  --c-raspberry-deep: #A23C4C;
+  --c-burgundy-rich: #872328;
+  --c-oxblood-dark: #6C1610;
+  --c-mahogany-deep: #521103;
+
+  /* Red-Amber Glow Accents (Matching Screenshot 1) */
+  --glow-amber-warm: rgba(255, 125, 75, 0.42);
+  --glow-red-crimson: rgba(215, 55, 80, 0.25);
+  --glow-edge-highlight: rgba(255, 205, 170, 0.3);
+  --glow-emerald-whisper: rgba(60, 180, 140, 0.12);
+
+  /* Deep Canvas */
+  --bg-void: #100305;
+  --bg-deep-wine: #1a0407;
+  
+  /* Cream Accents */
+  --cream-pure: #FAF4EE;
+  --cream-soft: #F5EAE0;
+  --cream-warm: #EBD9CC;
+  --cream-dim: rgba(250, 244, 238, 0.45);
+  --cream-subtle: rgba(250, 244, 238, 0.2);
+
+  /* Fonts */
+  --font-display: 'Syne', sans-serif;
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-void);
+  font-family: var(--font-sans);
+  color: var(--cream-soft);
+  user-select: none;
+}
+
+/* ========================================================
+   1. Subtle Velvet Red Breathing Horizon Background
+======================================================== */
+.breathing-bg-container {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background-color: var(--bg-void);
+  pointer-events: none;
+}
+
+.void-base {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 18%, var(--bg-deep-wine) 0%, var(--bg-void) 85%);
+}
+
+.radial-breathing-arc {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  filter: blur(75px);
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+.arc-outer {
+  bottom: -45vh;
+  width: 155vw;
+  height: 110vh;
+  background: radial-gradient(
+    ellipse at 50% 65%,
+    rgba(108, 22, 16, 0.6) 0%,
+    rgba(135, 35, 40, 0.45) 25%,
+    rgba(82, 17, 3, 0.35) 55%,
+    transparent 85%
+  );
+  animation: calmBreathOuter 14s ease-in-out infinite alternate;
+}
+
+.arc-mid {
+  bottom: -40vh;
+  width: 125vw;
+  height: 85vh;
+  background: radial-gradient(
+    ellipse at 50% 70%,
+    rgba(162, 60, 76, 0.5) 0%,
+    rgba(188, 90, 117, 0.3) 35%,
+    rgba(135, 35, 40, 0.18) 65%,
+    transparent 85%
+  );
+  filter: blur(60px);
+  animation: calmBreathMid 14s ease-in-out infinite alternate;
+  animation-delay: -4s;
+}
+
+.arc-core {
+  bottom: -32vh;
+  width: 90vw;
+  height: 55vh;
+  background: radial-gradient(
+    ellipse at 50% 80%,
+    rgba(215, 127, 160, 0.35) 0%,
+    rgba(235, 217, 204, 0.12) 30%,
+    rgba(188, 90, 117, 0.08) 60%,
+    transparent 85%
+  );
+  filter: blur(45px);
+  animation: calmBreathCore 14s ease-in-out infinite alternate;
+  animation-delay: -8s;
+}
+
+@keyframes calmBreathOuter {
+  0% { transform: translateX(-50%) scale(0.97) translateY(10px); opacity: 0.75; }
+  100% { transform: translateX(-50%) scale(1.04) translateY(-15px); opacity: 0.95; }
+}
+
+@keyframes calmBreathMid {
+  0% { transform: translateX(-50%) scale(0.96) translateY(8px); opacity: 0.7; }
+  100% { transform: translateX(-50%) scale(1.05) translateY(-20px); opacity: 0.9; }
+}
+
+@keyframes calmBreathCore {
+  0% { transform: translateX(-50%) scale(0.95) translateY(5px); opacity: 0.6; }
+  100% { transform: translateX(-50%) scale(1.07) translateY(-22px); opacity: 0.85; }
+}
+
+.subtle-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* ========================================================
+   2. Subtle Kinetic Grid Canvas
+======================================================== */
+#kineticGridCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.cursor-glow {
+  position: fixed;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(215, 127, 160, 0.08) 0%, rgba(188, 90, 117, 0.03) 40%, transparent 70%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 2;
+  filter: blur(25px);
+  will-change: transform;
+}
+
+/* ========================================================
+   3. 3D Perspective Stage
+======================================================== */
+.perspective-stage {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  perspective: 1400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ========================================================
+   4. Editorial Layout Frame
+======================================================== */
+.editorial-frame {
+  position: relative;
+  width: 90vw;
+  max-width: 1350px;
+  height: 86vh;
+  pointer-events: none;
+  transform-style: preserve-3d;
+  transition: transform 0.22s cubic-bezier(0.12, 0.8, 0.25, 1);
+}
+
+.frame-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px 12px;
+  pointer-events: auto;
+}
+
+/* Header */
+.editorial-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--cream-dim);
+  border-bottom: 1px solid rgba(215, 127, 160, 0.1);
+  padding-bottom: 14px;
+}
+
+.brand-tag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-pulse {
+  width: 6px;
+  height: 6px;
+  background-color: var(--c-rose-muted);
+  border-radius: 50%;
+  opacity: 0.85;
+}
+
+.brand-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--cream-soft);
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--cream-dim);
+}
+
+.meta-val {
+  color: var(--c-rose-muted);
+  font-weight: 500;
+}
+
+/* ========================================================
+   5. BOLD, FAT, TRANSPARENT TYPOGRAPHY (CREAM & DUSTY ROSE)
+======================================================== */
+.typography-hero {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  width: 95%;
+  max-width: 1150px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.eyebrow-text {
+  font-family: var(--font-sans);
+  font-size: clamp(0.78rem, 1.1vw, 0.95rem);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--c-rose-muted);
+  margin-bottom: 4px;
+  opacity: 0.85;
+}
+
+.title-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 0.84;
+  margin: 6px 0 20px;
+}
+
+.title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 20px;
+}
+
+.word-fat {
+  font-family: var(--font-display);
+  font-size: clamp(5rem, 14vw, 12.5rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.035em;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1.6px var(--cream-soft);
+  text-shadow: 0 10px 35px rgba(0, 0, 0, 0.75);
+  display: inline-block;
+  user-select: none;
+}
+
+.sub-particle {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(2.2rem, 5.5vw, 5rem);
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1.2px var(--c-rose-muted);
+  transform: translateY(-10px);
+}
+
+.manifesto-text {
+  max-width: 460px;
+  margin: 0 auto;
+  font-family: var(--font-sans);
+  font-size: clamp(0.82rem, 1vw, 0.94rem);
+  font-weight: 300;
+  line-height: 1.6;
+  color: var(--cream-dim);
+  letter-spacing: 0.02em;
+}
+
+/* ========================================================
+   6. RED-AMBER GLOWING FROSTED GLASS BLOCKS
+   (Inspired by User's Reference Screenshot 1)
+======================================================== */
+.glowing-glass-block {
+  position: relative;
+  background: rgba(18, 4, 8, 0.65);
+  backdrop-filter: blur(28px) saturate(150%);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 170, 130, 0.16);
+  box-shadow: 
+    0 18px 40px rgba(0, 0, 0, 0.65),
+    0 0 25px rgba(215, 65, 55, 0.08),
+    inset 0 1px 1px 0 var(--glow-edge-highlight);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Signature Red-Amber Glow Leaking Through Top & Edge */
+.glowing-glass-block .block-glow-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 18% -10%, var(--glow-amber-warm) 0%, var(--glow-red-crimson) 30%, transparent 65%),
+    radial-gradient(circle at 85% 120%, var(--glow-emerald-whisper) 0%, transparent 40%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.glowing-glass-block:hover {
+  border-color: rgba(255, 190, 150, 0.3);
+  box-shadow: 
+    0 22px 50px rgba(0, 0, 0, 0.75),
+    0 0 35px rgba(255, 110, 75, 0.15),
+    inset 0 1px 2px 0 rgba(255, 230, 200, 0.4);
+}
+
+/* 6A. Navigation Catalog Block */
+.catalog-block {
+  position: absolute;
+  left: 12px;
+  bottom: 75px;
+  width: 230px;
+  padding: 16px 18px;
+  z-index: 12;
+  pointer-events: auto;
+}
+
+.catalog-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.block-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--cream-soft);
+  border: 1px solid rgba(255, 180, 140, 0.15);
+}
+
+.catalog-heading {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+}
+
+.catalog-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.catalog-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  color: var(--cream-dim);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.catalog-item .num {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--cream-dim);
+  margin-right: 8px;
+}
+
+.catalog-item .indicator-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: transparent;
+  transition: background-color 0.2s ease;
+}
+
+.catalog-item:hover,
+.catalog-item.active {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--cream-pure);
+}
+
+.catalog-item.active .num {
+  color: #ff9e7a;
+  font-weight: 600;
+}
+
+.catalog-item.active .indicator-dot {
+  background: #ff7d4b;
+  box-shadow: 0 0 8px #ff7d4b;
+}
+
+.block-hint {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  color: var(--cream-subtle);
+  text-align: center;
+}
+
+/* ========================================================
+   7. Footer & Red-Amber Glowing Controls Block
+======================================================== */
+.editorial-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--cream-dim);
+  border-top: 1px solid rgba(215, 127, 160, 0.1);
+  padding-top: 14px;
+  z-index: 20;
+}
+
+.footer-note {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--cream-dim);
+}
+
+/* 7A. Controls Frosted Pill Block */
+.controls-block {
+  padding: 6px 8px;
+  border-radius: 100px;
+}
+
+.interactive-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Sub-Pills matching Screenshot 1 */
+.pill-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--cream-soft);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  padding: 7px 14px;
+  border-radius: 100px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.22s ease;
+}
+
+.pill-btn .btn-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--cream-dim);
+  transition: background-color 0.22s ease;
+}
+
+.pill-btn .chevron {
+  font-size: 0.65rem;
+  opacity: 0.6;
+  margin-left: 2px;
+}
+
+.pill-btn:hover {
+  background: rgba(255, 140, 100, 0.12);
+  border-color: rgba(255, 180, 140, 0.3);
+  color: var(--cream-pure);
+}
+
+.pill-btn.active {
+  background: rgba(255, 95, 60, 0.22);
+  border-color: rgba(255, 125, 75, 0.6);
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(255, 125, 75, 0.35);
+}
+
+.pill-btn.active .btn-dot {
+  background-color: #ff8555;
+  box-shadow: 0 0 6px #ff8555;
+}
+
+/* Icon-only circular button (matching arrow in screenshot 1) */
+.pill-btn.icon-only {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.pill-btn.icon-only .arrow-up {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cream-soft);
+  transition: transform 0.2s ease;
+}
+
+.pill-btn.icon-only:hover .arrow-up {
+  transform: translateY(-2px);
+  color: #fff;
+}
+
+/* ========================================================
+   8. Responsive Design
+======================================================== */
+@media (max-width: 900px) {
+  .catalog-block {
+    display: none;
+  }
+  .footer-note {
+    display: none;
+  }
+  .editorial-footer {
+    justify-content: center;
+  }
+  .controls-block {
+    border-radius: 18px;
+    padding: 8px 10px;
+  }
+  .interactive-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
