@@ -182,7 +182,6 @@ def get_state():
 
         # Flask automatically converts this dictionary into JSON.
         return {
-            "mood": mood,
             "movies_tv": capped_items["movies_tv"],
             "music": capped_items["music"],
             "games": capped_items["games"],
