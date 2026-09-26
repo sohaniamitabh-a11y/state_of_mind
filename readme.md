@@ -37,11 +37,11 @@ Ranking is **`relevance_score` first, `popularity_score` only as a tiebreaker** 
 | Component | Status | Detail |
 |---|---|---|
 | **The Brain** | Done / live | `mood_genre_mapping` — 51 weighted mood-to-genre rows (46 from team ratings + 5 for music `Other`). 74 more queued, awaiting survey results |
-| **The Harvester** | Partial | Movies/TV tested and working. Games blocked on a RAWG API key. Music written but never run |
+| **The Harvester** | Partial | All three have run live. Games warn on missing `action` slug; music uses aliases + `Other` fallback |
 | **The Backend / Engine** | Stage 5 of 7 | `/get-state` endpoint is wired, deduplicated, bucketed, and capped. Stage 6 (404 handling) next |
 | **Frontend** | Not started | Planned Flutter app — five fixed mood buttons, no free-text input. Zero code yet |
 
-**Live database right now:** 5 moods, 64 genres, 51 Brain rows, 40 items (movies and TV only — no games or music harvested yet), `item_genres` populated from those items, `feedback` empty and unused.
+**Live database right now:** 5 moods, 64 genres, 51 Brain rows, 70 items (20 movie / 20 tv / 20 game / 10 music), 119 `item_genres` links, `feedback` empty and unused.
 
 ### Backend stages
 
@@ -72,9 +72,9 @@ Every file, and what it's for. Files are currently flat in the root; nothing has
 
 | File | Source | Status |
 |---|---|---|
-| `harvest_movies_tv.py` | TMDB trending movies + TV | Tested and working — produced the current 40 items |
-| `harvest_games.py` | RAWG games, ordered by `-added` | Written, never run — no RAWG API key yet |
-| `harvest_music.py` | Deezer chart tracks, with name aliases and an `Other` fallback | Written, never run — needs no key |
+| `harvest_movies_tv.py` | TMDB trending movies + TV | Tested and working — original 40 movie/TV items |
+| `harvest_games.py` | RAWG games, ordered by `-added` | Live run done — warns on missing `action` slug |
+| `harvest_music.py` | Deezer chart tracks | Live run done — aliases + `Other` fallback |
 
 ### Schema and seed data
 
@@ -164,4 +164,4 @@ Contributing conventions — including commit message format — are in [CONTRIB
 
 ## Team
 
-A 3-person college mini-project. Each teammate's device runs one harvester against the shared cloud database: movies/TV, games, or music. Teammates are still onboarding, so only the movies/TV harvester has run against real data so far — which is why `items` currently holds movies and TV only.
+A 3-person college mini-project. Each teammate's device runs one harvester against the shared cloud database: movies/TV, games, or music. Teammates are still onboarding, but a one-off live harvest has now populated all three sources (movies/TV, games, and music).

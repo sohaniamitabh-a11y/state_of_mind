@@ -38,20 +38,16 @@ Per-device API key:
 | Device / role | Key needed |
 |---|---|
 | Movies/TV (this device) | `TMDB_API_KEY` |
-| Games (Windows teammate) | `RAWG_API_KEY` — **not yet obtained**, rawg.io signup has been unreliable |
+| Games (Windows teammate) | `RAWG_API_KEY` — obtained; first live harvest completed |
 | Music (MacBook teammate) | none — Deezer's public read endpoints need no key |
 
 Nobody needs all three. One API per device is deliberate — see [04-HARVESTERS.md](04-HARVESTERS.md).
 
 ### `DB_SSL_CA`
 
-The Aiven instance requires SSL. `DB_SSL_CA` is a path to the CA certificate, which is present in the repo at `ignore/ca.pem`. `app.py`, `test_query.py`, and the runner scripts pass it as `ssl_ca` alongside `ssl_verify_cert=True`, and will fail to connect without it.
+The Aiven instance requires SSL. `DB_SSL_CA` is a path to the CA certificate, which is present in the repo at `ignore/ca.pem`. `app.py`, `test_query.py`, the runner scripts, and all three harvesters pass it as `ssl_ca` alongside `ssl_verify_cert=True`, and will fail to connect without it.
 
-The three harvesters currently do **not** read `DB_SSL_CA` and don't set any SSL parameters, even though `harvest_movies_tv.py` has been tested working against the live instance. Worth reconciling before the games and music harvesters run on other machines.
-
-Also note the harvesters hardcode `"database": "state_of_mind"` rather than reading `DB_NAME`, so setting `DB_NAME` to anything else would silently apply to the runners and `app.py` but not to the harvesters.
-
-The in-file setup docstrings at the top of each harvester predate `DB_NAME` and `DB_SSL_CA` and don't mention them. Use this document instead.
+Harvesters also read `DB_NAME` (defaulting to `state_of_mind` if unset), same as the runners and `app.py`.
 
 ## First-time database setup
 
@@ -95,8 +91,8 @@ Try it with `GET /get-state?mood=Happy/Excitement`. The mood must match a `moods
 
 ```
 python harvest_movies_tv.py     # tested and working
-python harvest_games.py         # needs RAWG_API_KEY, never run for real
-python harvest_music.py         # no key needed, never run for real
+python harvest_games.py         # needs RAWG_API_KEY; live run done (warns on missing action slug)
+python harvest_music.py         # no key needed; live run done (Other fallback available)
 ```
 
 Each runs once and exits. There's no internal loop.
