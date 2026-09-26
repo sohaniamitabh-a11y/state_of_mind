@@ -38,7 +38,7 @@ Ranking is **`relevance_score` first, `popularity_score` only as a tiebreaker** 
 |---|---|---|
 | **The Brain** | Done / live | `mood_genre_mapping` — 51 weighted mood-to-genre rows (46 from team ratings + 5 for music `Other`). 74 more queued, awaiting survey results |
 | **The Harvester** | Partial | All three have run live. Games warn on missing `action` slug; music uses aliases + `Other` fallback |
-| **The Backend / Engine** | Stage 4 of 7 | Join query live on `/get-state`, returns raw duplicated rows. Stage 5 (dedupe, bucketing, top-5 cap) in progress |
+| **The Backend / Engine** | Stage 5 of 7 | `/get-state` endpoint is wired, deduplicated, bucketed, and capped. Stage 6 (404 handling) next |
 | **Frontend** | Not started | Planned Flutter app — five fixed mood buttons, no free-text input. Zero code yet |
 
 **Live database right now:** 5 moods, 64 genres, 51 Brain rows, 70 items (20 movie / 20 tv / 20 game / 10 music), 119 `item_genres` links, `feedback` empty and unused.
@@ -51,11 +51,11 @@ Built deliberately as a step-by-step learning project rather than from a generic
 - [x] **Stage 2** — Reading query params (`/get-state?mood=X`) via `request.args`
 - [x] **Stage 3** — Live connection to the cloud DB from inside a request
 - [x] **Stage 4** — The full mood → genre → items join query, wired into the live route
-- [ ] **Stage 5** — Shaping the response: dedupe results, bucket into movies_tv / music / games, cap at top 5 each
+- [x] **Stage 5** — Shaping the response: dedupe results, bucket into movies_tv / music / games, cap at top 5 each
 - [ ] **Stage 6** — Error handling (404 on invalid/missing mood)
 - [ ] **Stage 7** — Testing the API standalone, without the frontend
 
-Stage 5 is partly done: the dedupe works in `test_query.py` but hasn't been merged into `app.py` yet. Bucketing and the cap haven't been started. See [05-BACKEND.md](docs/05-BACKEND.md).
+Stage 5 is complete: `app.py` groups unique items into three JSON buckets, capped at 5 each. See [05-BACKEND.md](docs/05-BACKEND.md).
 
 ## What's in this repo
 
@@ -66,7 +66,7 @@ Every file, and what it's for. Files are currently flat in the root; nothing has
 | File | Purpose |
 |---|---|
 | `app.py` | The Flask API. Two routes: `/` liveness, and `/get-state?mood=X` which runs the recommendation join |
-| `test_query.py` | Standalone runner for the same join with the mood hardcoded, plus the stage-5 dedupe logic that isn't in `app.py` yet |
+| `test_query.py` | Earlier prototype of the dedupe, keyed on title and printed to the console. The live path is `remove_duplicates()` in `app.py` |
 
 ### Harvesters — one API each, one device each
 
@@ -153,7 +153,7 @@ If you're setting up a fresh database rather than connecting to the shared one, 
 | [02-DATABASE.md](docs/02-DATABASE.md) | All six tables, column by column, with the genre breakdown |
 | [03-DATA-PIPELINE.md](docs/03-DATA-PIPELINE.md) | The mandatory run order and how the runner scripts work |
 | [04-HARVESTERS.md](docs/04-HARVESTERS.md) | The three collectors, their status and known limitations |
-| [05-BACKEND.md](docs/05-BACKEND.md) | The seven stages, what stage 5 still needs, known rough edges |
+| [05-BACKEND.md](docs/05-BACKEND.md) | The seven stages. Stage 5 is done; stage 6 (404) is next |
 | [06-BRAIN-AND-RATINGS.md](docs/06-BRAIN-AND-RATINGS.md) | Where relevance scores come from and how they're calculated |
 | [07-SETUP.md](docs/07-SETUP.md) | Per-device setup and teammate onboarding |
 | [08-DECISIONS.md](docs/08-DECISIONS.md) | Every significant design decision, its reasoning, and its cost |
@@ -164,4 +164,4 @@ Contributing conventions — including commit message format — are in [CONTRIB
 
 ## Team
 
-A 3-person college mini-project. Each teammate's device runs one harvester against the shared cloud database: movies/TV, games, or music. Teammates are still onboarding, so only the movies/TV harvester has run against real data so far — which is why `items` currently holds movies and TV only.
+A 3-person college mini-project. Each teammate's device runs one harvester against the shared cloud database: movies/TV, games, or music. Teammates are still onboarding, but a one-off live harvest has now populated all three sources (movies/TV, games, and music).

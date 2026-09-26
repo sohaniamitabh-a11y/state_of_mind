@@ -21,7 +21,7 @@ All three scripts follow the same shape, and the similarity is intentional — i
 - **Upsert, don't insert.** Every script uses `INSERT ... ON DUPLICATE KEY UPDATE` against `items`, refreshing `popularity_score` and stamping `harvested_at`, leaning on `UNIQUE (media_type, external_id)` to detect the collision.
 - **Link genres with `INSERT IGNORE`.** Re-linking an existing (item, genre) pair is a silent no-op.
 - **Resolve the item ID defensively.** After the upsert, `cursor.lastrowid` gives the new ID on a fresh insert but is falsy on an update, so each script falls back to a `SELECT id FROM items WHERE media_type = ... AND external_id = ...`.
-- **Never invent a genre.** If an incoming genre can't be matched to a row in `genres`, the script skips that link and moves on. It does not create genre rows on the fly. Two of the three print a warning when this happens.
+- **Never insert a genre row at harvest time.** An unmatched genre is skipped. The music script is the one exception in linking, not in creating: if none of a track's names match, it links the pre-seeded `Other` row. It does not `INSERT` into `genres`.
 - **Store the whole raw response.** `json.dumps(entry)` goes into `items.metadata`, so nothing from the API is lost even though only four fields are promoted to columns.
 
 ## `harvest_movies_tv.py` — TMDB

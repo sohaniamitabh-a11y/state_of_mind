@@ -2,7 +2,7 @@
 
 The Brain is the `mood_genre_mapping` table: one row per (mood, genre) pair carrying a `relevance_score`. It is the only place in the system that holds an opinion about which content suits which mood. Everything else — harvesters, join query, sort order — is plumbing around it.
 
-Status: done and live. 46 rows in the database, 74 more queued.
+Status: done and live. 51 rows in the database (46 from the first ratings round, plus 5 that map music `Other` to every mood at `0.25`). 74 more are queued on the genre-expansion survey.
 
 ## Why it's a table and not code
 
@@ -67,7 +67,7 @@ The subqueries aren't uniform, and the reason is in the source data:
 
 The music rows carry an explicit warning in the file: confirm exact spelling with `SELECT id, name, external_id FROM genres WHERE media_type = 'music'` before running them, because a name mismatch would make the subquery return NULL and the INSERT fail rather than silently misfile the row.
 
-## The 46 live rows
+## The 46 rated rows
 
 | Mood | Genres mapped | Highest-scoring |
 |---|---|---|
@@ -87,9 +87,15 @@ A genre can and does appear under several moods with different weights, which is
 
 **Two genres are acknowledged proxies rather than real matches.** Adventure (game) under Sad/Melancholy at 0.47, and Puzzle (game) under Confusion/Anxiety at 0.47, are both commented as "closest proxy, no clean genre match." RAWG's taxonomy has no genre that genuinely corresponds to those moods, and the choice was to record the nearest thing and label it rather than leave the mood with no game coverage at all.
 
+## The `Other` music rows
+
+These five are not survey scores. `add_other_music_genre.sql` inserts the music genre `Other` and maps it to all five moods at relevance `0.25`, so a Deezer track that matches no curated bucket can still come back from the join, ranked below the rated genres. `harvest_music.py` only links `Other` when none of that track's album genre names matched. See [04-HARVESTERS.md](04-HARVESTERS.md).
+
+That brings the live Brain to 51 rows and music genres to 11 (64 genres in total).
+
 ## The 74 queued rows
 
-The 46 live rows only cover the genres that existed at the time of the first ratings round — the 38 seeded by `seed_mood_genre.sql`. `expand_genres.sql` has since taken `genres` to 63 rows, and none of those 25 additions (Horror, Romance, Crime, Animation, Platformer, Indie, and the rest) have been rated against any mood yet.
+The 46 rated rows only cover the genres that existed at the time of the first ratings round — the 38 seeded by `seed_mood_genre.sql`. `expand_genres.sql` later added 25 genres (Horror, Romance, Crime, Animation, Platformer, Indie, and the rest). None of those have been rated against any mood yet. `Other` is a separate fallback, not one of those 25.
 
 **74 further `mood_genre_mapping` rows are queued, waiting on the genre-expansion ratings to come back from the survey.** Until they land, the newly added genres exist in the catalog but are invisible to the recommendation engine: with no `mood_genre_mapping` row, the join simply never reaches items tagged with them.
 

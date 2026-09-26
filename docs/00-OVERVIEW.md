@@ -18,7 +18,7 @@ New moods, new genres, and entirely new media domains are added as new **rows**,
 |---|---|---|
 | **The Brain** | Done / live | The `mood_genre_mapping` table — a weighted relevance score for every mood-genre pair, derived from human ratings |
 | **The Harvester** | Partial | Three standalone Python scripts that pull trending content into the `items` cache, one per media source |
-| **The Backend / Engine** | In progress — stage 4 of 7 done, stage 5 underway | Flask API exposing `/get-state?mood=X`, which joins mood → genre → items and returns ranked recommendations |
+| **The Backend / Engine** | Stage 5 of 7 done | Flask API. `/get-state?mood=X` joins mood → genre → items, dedupes, buckets into movies_tv / music / games, and returns the top 5 of each as JSON |
 | **Frontend** | Not started | Flutter app with five fixed mood buttons. Zero code written yet |
 
 ## Where the project actually stands right now
@@ -36,7 +36,7 @@ New moods, new genres, and entirely new media domains are added as new **rows**,
 
 - **Brain:** done and live. The original 46 mapping rows came from the first round of ratings; five more map music `Other` to every mood at low relevance so unmatched Deezer tracks stay recommendable.
 - **Harvester:** all three have run against live Aiven. Movies/TV remain the original 40. Games harvested 20 RAWG titles but warn on missing `action` slug (4 games ended with zero genre links). Music harvested 10 Deezer chart tracks; one fell back to `Other`.
-- **Backend:** stage 4 of 7 is complete. The full mood → genre → items join is wired into the live `/get-state` route, but it returns raw duplicated rows. Stage 5 is in progress: the dedupe logic is written and tested inside `test_query.py` but has **not** been merged into `app.py`, and the bucketing into `movies_tv` / `music` / `games` plus the top-5-per-bucket cap hasn't been started.
+- **Backend:** stage 5 of 7 is complete in `app.py`. The join still returns one row per matching genre; `remove_duplicates()` keeps the highest relevance per item id, `group_items_by_media()` splits those into `movies_tv` / `music` / `games`, and `cap_each_bucket()` keeps the top 5 of each. The route returns that as JSON. Stage 6 (404 on an invalid mood) and stage 7 (standalone API testing) are not started. `test_query.py` is the earlier title-keyed prototype of the dedupe; the live path no longer depends on it.
 - **Frontend:** not started.
 
 ## Team and division of work
