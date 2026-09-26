@@ -2,7 +2,7 @@ import os
 
 import mysql.connector
 from dotenv import load_dotenv
-from flask import Flask, request
+from flask import Flask, abort, request
 
 # Read database settings from the .env file.
 load_dotenv()
@@ -12,6 +12,13 @@ app = Flask(__name__)
 
 # Maximum number of recommendations returned per category.
 MAX_ITEMS_PER_BUCKET = 5
+ALLOWED_MOODS = {
+    "Happy/Excitement",
+    "Calm/Serene",
+    "Sad/Melancholy",
+    "Anger/Rage",
+    "Confusion/Anxiety",
+}
 
 
 @app.route("/")
@@ -123,6 +130,8 @@ def get_state():
     # Example URL:
     # /get-state?mood=Happy/Excitement
     mood = request.args.get("mood")
+    if mood not in ALLOWED_MOODS:
+        abort(404, description="Invalid mood")
 
     # Connect securely to the Aiven MySQL database.
     connection = mysql.connector.connect(
