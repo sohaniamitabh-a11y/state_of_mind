@@ -1,5 +1,11 @@
 # State of Mind
 
+[![Last commit](https://img.shields.io/github/last-commit/sohaniamitabh-a11y/state_of_mind)](https://github.com/sohaniamitabh-a11y/state_of_mind/commits/main)
+[![Issues](https://img.shields.io/github/issues/sohaniamitabh-a11y/state_of_mind)](https://github.com/sohaniamitabh-a11y/state_of_mind/issues)
+[![Flask](https://img.shields.io/badge/Flask-3%2B-black?logo=flask)](https://flask.palletsprojects.com/)
+[![MySQL](https://img.shields.io/badge/MySQL-Aiven-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![Flutter](https://img.shields.io/badge/Flutter-frontend-02569B?logo=flutter&logoColor=white)](https://flutter.dev/)
+
 A mood-based cross-media recommendation engine. Pick how you're feeling — the engine hands back Movies, TV, Music, and Games that actually fit that headspace.
 
 No sign-up, no live API calls at query time. Everything runs off a cached cloud database, refreshed periodically by scheduled harvesters, so recommendations are instant.
