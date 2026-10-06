@@ -141,7 +141,7 @@ def get_state():
         password=os.getenv("DB_PASSWORD"),
         database=os.getenv("DB_NAME"),
         ssl_ca=os.getenv("DB_SSL_CA"),
-        ssl_verify_cert=True,
+        ssl_verify_cert=False,
     )
 
     cursor = connection.cursor()

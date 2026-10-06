@@ -44,8 +44,8 @@ Ranking is **`relevance_score` first, `popularity_score` only as a tiebreaker** 
 |---|---|---|
 | **The Brain** | Done / live | `mood_genre_mapping` — 51 weighted mood-to-genre rows (46 from team ratings + 5 for music `Other`). 74 more queued, awaiting survey results |
 | **The Harvester** | Partial | All three have run live. Games warn on missing `action` slug; music uses aliases + `Other` fallback |
-| **The Backend / Engine** | Stage 5 of 7 | `/get-state` endpoint is wired, deduplicated, bucketed, and capped. Stage 6 (404 handling) next |
-| **Frontend** | Not started | Planned Flutter app — five fixed mood buttons, no free-text input. Zero code yet |
+| **The Backend / Engine** | Stage 6 of 7 | `/get-state` endpoint is wired, deduplicated, bucketed, capped at top 5, and validates moods (rejects invalid moods with 404). Stage 7 (testing) next |
+| **Frontend** | Active (3 Frontends) | 3 frontend implementations created. The **Blooming Flower** Flutter frontend is the main/flagship interface right now. Also includes a **Shader & Stacking Cards** Flutter frontend and a **Kinetic Grid** Web UI (`anti-frontend-only/`) |
 
 **Live database right now:** 5 moods, 64 genres, 51 Brain rows, 70 items (20 movie / 20 tv / 20 game / 10 music), 119 `item_genres` links, `feedback` empty and unused.
 
@@ -58,10 +58,10 @@ Built deliberately as a step-by-step learning project rather than from a generic
 - [x] **Stage 3** — Live connection to the cloud DB from inside a request
 - [x] **Stage 4** — The full mood → genre → items join query, wired into the live route
 - [x] **Stage 5** — Shaping the response: dedupe results, bucket into movies_tv / music / games, cap at top 5 each
-- [ ] **Stage 6** — Error handling (404 on invalid/missing mood)
+- [x] **Stage 6** — Error handling (404 on invalid/missing mood via `ALLOWED_MOODS`)
 - [ ] **Stage 7** — Testing the API standalone, without the frontend
 
-Stage 5 is complete: `app.py` groups unique items into three JSON buckets, capped at 5 each. See [05-BACKEND.md](docs/05-BACKEND.md).
+Stage 6 is complete: `app.py` enforces allowed moods, returning HTTP 404 for invalid inputs, and returns shaped JSON buckets without extraneous metadata. See [05-BACKEND.md](docs/05-BACKEND.md).
 
 ## What's in this repo
 
@@ -69,9 +69,11 @@ Every file, and what it's for. Files are currently flat in the root; nothing has
 
 ### The application
 
-| File | Purpose |
+| File / Folder | Purpose |
 |---|---|
-| `app.py` | The Flask API. Two routes: `/` liveness, and `/get-state?mood=X` which runs the recommendation join |
+| `app.py` | The Flask API. Two routes: `/` liveness, and `/get-state?mood=X` which validates moods and runs the recommendation join |
+| `frontend/` | Flutter frontend package containing the main **Blooming Flower** video background experience, along with the interactive shader background and card stack mood picker |
+| `anti-frontend-only/` | Standalone **Kinetic Grid** HTML5/Canvas editorial web frontend with real-time grid warping and atmospheric controls |
 | `test_query.py` | Earlier prototype of the dedupe, keyed on title and printed to the console. The live path is `remove_duplicates()` in `app.py` |
 
 ### Harvesters — one API each, one device each
@@ -118,7 +120,7 @@ Each runner applies exactly one SQL file to the remote SSL-required database, an
 
 - **Backend:** Python (Flask), MySQL (Aiven cloud, SSL required)
 - **Data sources:** TMDB (movies/TV), RAWG (games), Deezer (music)
-- **Frontend (planned):** Flutter
+- **Frontend:** Flutter / Dart (featuring the flagship Blooming Flower video background UI & Shader Stacking Cards), HTML5 Canvas / JavaScript (`anti-frontend-only/`)
 - **Data prep:** Python runner scripts for the schema/seed/mapping SQL; Google Forms for the genre-mood survey ratings
 
 ## Quickstart

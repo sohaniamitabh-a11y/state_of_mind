@@ -85,7 +85,19 @@ python app.py
 
 Serves on Flask's development server with `debug=True` (auto-reload, interactive debugger). Development-only.
 
-Try it with `GET /get-state?mood=Happy/Excitement`. The mood must match a `moods.name` value exactly. The response is JSON with `movies_tv`, `music`, and `games`, each capped at 5. A mood that doesn't match currently returns HTTP 200 and three empty lists — the 404 is stage 6 and is not built yet. See [05-BACKEND.md](05-BACKEND.md).
+Try it with `GET /get-state?mood=Happy/Excitement`. The mood must match a `moods.name` value in `ALLOWED_MOODS` exactly. The response is JSON with `movies_tv`, `music`, and `games`, each capped at 5. A mood that does not match returns HTTP 404 (Invalid mood). See [05-BACKEND.md](05-BACKEND.md).
+
+**The Flutter frontend (Flagship Blooming Flower & Shader Cards):**
+
+```bash
+cd frontend
+flutter pub get
+flutter run -d chrome    # or native target: flutter run
+```
+
+**The Kinetic Grid Web frontend:**
+
+Open `anti-frontend-only/index.html` directly in any modern browser, or serve it using any static server (e.g. `npx serve anti-frontend-only` or `python -m http.server`).
 
 **A harvest, manually:**
 
@@ -109,7 +121,7 @@ Runs the same join with the mood hardcoded to `Happy/Excitement`, then dedupes b
 
 ## Onboarding a teammate
 
-The current state is that teammates haven't finished onboarding, so the movies/TV device is the only one that has ever run a harvest. For a new device:
+Initial one-off harvests have already populated sample items across all three sources. For a new device:
 
 1. Install Python and the four packages.
 2. Get the shared DB credentials and a copy of `ca.pem`; create the local `.env`.

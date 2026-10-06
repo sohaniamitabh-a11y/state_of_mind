@@ -18,8 +18,8 @@ New moods, new genres, and entirely new media domains are added as new **rows**,
 |---|---|---|
 | **The Brain** | Done / live | The `mood_genre_mapping` table — a weighted relevance score for every mood-genre pair, derived from human ratings |
 | **The Harvester** | Partial | Three standalone Python scripts that pull trending content into the `items` cache, one per media source |
-| **The Backend / Engine** | Stage 5 of 7 done | Flask API. `/get-state?mood=X` joins mood → genre → items, dedupes, buckets into movies_tv / music / games, and returns the top 5 of each as JSON |
-| **Frontend** | Not started | Flutter app with five fixed mood buttons. Zero code written yet |
+| **The Backend / Engine** | Stage 6 of 7 done | Flask API. `/get-state?mood=X` joins mood → genre → items, dedupes, buckets into movies_tv / music / games, caps at top 5 each, validates moods with 404 error handling, and returns JSON |
+| **Frontend** | Active (3 Frontends) | 3 distinct frontends built. The **Blooming Flower** Flutter frontend is the primary/flagship experience. Also includes a **Shader & Stacking Cards** Flutter frontend and a standalone **Kinetic Grid** Web UI (`anti-frontend-only/`) |
 
 ## Where the project actually stands right now
 
@@ -36,8 +36,11 @@ New moods, new genres, and entirely new media domains are added as new **rows**,
 
 - **Brain:** done and live. The original 46 mapping rows came from the first round of ratings; five more map music `Other` to every mood at low relevance so unmatched Deezer tracks stay recommendable.
 - **Harvester:** all three have run against live Aiven. Movies/TV remain the original 40. Games harvested 20 RAWG titles but warn on missing `action` slug (4 games ended with zero genre links). Music harvested 10 Deezer chart tracks; one fell back to `Other`.
-- **Backend:** stage 5 of 7 is complete in `app.py`. The join still returns one row per matching genre; `remove_duplicates()` keeps the highest relevance per item id, `group_items_by_media()` splits those into `movies_tv` / `music` / `games`, and `cap_each_bucket()` keeps the top 5 of each. The route returns that as JSON. Stage 6 (404 on an invalid mood) and stage 7 (standalone API testing) are not started. `test_query.py` is the earlier title-keyed prototype of the dedupe; the live path no longer depends on it.
-- **Frontend:** not started.
+- **Backend:** stage 6 of 7 is complete in `app.py`. The join returns matching rows by genre; `remove_duplicates()` keeps the highest relevance per item id, `group_items_by_media()` splits those into `movies_tv` / `music` / `games`, and `cap_each_bucket()` keeps the top 5 of each. `app.py` enforces `ALLOWED_MOODS`, returning HTTP 404 on invalid or missing moods. The route returns pure category buckets as JSON. Stage 7 (standalone API test suite) is next. `test_query.py` is the earlier title-keyed prototype of the dedupe; the live path no longer depends on it.
+- **Frontend:** 3 frontends have been developed and demonstrated:
+  1. **Blooming Flower Flutter UI (Main / Flagship):** Features an organic blooming flower video background (`flower_video_background.dart`), custom typography, ambient gradient blending, and seamless mood transitions.
+  2. **Shader & Stacking Cards Flutter UI (`frontend/`):** Features a GLSL fragment shader background (`background.frag`), scroll-driven card stacking animations, and categorized results viewing via `ResultsPage`.
+  3. **Kinetic Grid Web UI (`anti-frontend-only/`):** Standalone HTML5/Canvas/CSS/JS frontend with interactive kinetic warping mesh, radial breathing gradient arcs, cursor halo, 3D perspective shift, and atmospheric controls.
 
 ## Team and division of work
 

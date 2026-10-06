@@ -48,17 +48,23 @@ Status: partial. Details in [04-HARVESTERS.md](04-HARVESTERS.md).
 
 ### 3. The Backend / Engine — `app.py`
 
-A Flask app with two routes: `/` (a JSON liveness object) and `/get-state`. `/get-state` reads a `mood` query parameter, opens a MySQL connection inside the request, runs the four-table join, then shapes the rows before returning JSON.
+A Flask app with two routes: `/` (a JSON liveness object) and `/get-state`. `/get-state` reads a `mood` query parameter, validates it against `ALLOWED_MOODS` (returning HTTP 404 for invalid/missing values), opens a MySQL connection inside the request, runs the four-table join, then shapes the rows before returning JSON.
 
 The judgement of which genres fit a mood still lives only in the Brain table. After the join, `app.py` does three mechanical steps: drop duplicate items (keeping the highest relevance), split the remainder into `movies_tv` / `music` / `games`, and keep the top 5 of each bucket.
 
-Status: stage 5 of 7. Details in [05-BACKEND.md](05-BACKEND.md).
+Status: stage 6 of 7 done. Details in [05-BACKEND.md](05-BACKEND.md).
 
-### 4. Frontend — planned Flutter app
+### 4. Frontend — Three Visual Implementations (Blooming Flower Flagship)
 
-Five fixed mood buttons, no free-text input. This constraint is load-bearing: because the UI can only ever emit one of five exact strings, the API takes the mood as a name rather than a numeric ID, and any unmatched mood is a genuine error rather than a search miss. See [08-DECISIONS.md](08-DECISIONS.md).
+The user interface presents the five fixed mood options without free-text input. This constraint is load-bearing: because the UI emits only one of five exact strings, the API takes the mood as a name rather than a numeric ID, and any unmatched mood is a genuine error rather than a search miss. See [08-DECISIONS.md](08-DECISIONS.md).
 
-Status: not started, zero code.
+Rather than a single static design, three frontend implementations were created to test and demonstrate different user experiences:
+
+1. **Blooming Flower Flutter Frontend (Main / Flagship):** The primary production-grade Flutter interface. It utilizes an organic blooming flower video background (`flower_video_background.dart`), fluid gradient blending, delicate serif/script typography, and smooth state transitions upon mood selection.
+2. **Shader & Stacking Cards Flutter Frontend (`frontend/`):** A Flutter implementation featuring an interactive GLSL fragment shader background (`background.frag`), scroll-linked stacking card mechanics (`MoodStackPage`), and categorized horizontal carousels (`ResultsPage`).
+3. **Kinetic Grid Editorial Web Frontend (`anti-frontend-only/`):** A standalone HTML5/Canvas/CSS/JS frontend featuring a real-time kinetic warping grid, radial breathing gradient arcs, cursor halo, 3D perspective tilt, and atmospheric audio/visual controls.
+
+Status: Active. The Blooming Flower Flutter frontend serves as the primary visual interface demonstrated to reviewers and instructors.
 
 ## The join that is the engine
 

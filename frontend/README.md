@@ -1,25 +1,23 @@
 # State of Mind — Frontend
 
-Flutter app for the mood-based recommendation picker. Kept fully separate
-from the Python/SQL backend at the repo root — this package talks to a
-swappable `ResultsRepository`, and the only implementation today is static
-sample data.
+Flutter app for the mood-based recommendation picker. Kept modular and separate
+from the Python/SQL backend at the repo root — designed with swappable components
+and repository interfaces for connecting to live `/get-state` endpoints or static mock datasets.
 
 ## What's here
 
+- **Flagship Blooming Flower Frontend Experience:** The primary interactive interface designed for teacher demonstration and production presentation, featuring an organic blooming flower background with seamless gradient feathering, glassmorphism, and atmospheric mood selection.
 - `lib/main.dart` — `MaterialApp` (dark theme, no app bar) whose home is
-  `HomeShell`: a `ShaderBackground` behind a foreground that swaps between
-  the mood picker and the results page. The background stays mounted the
-  whole time (an opaque `Navigator.push` would hide it).
-- `lib/background/shader_background.dart` + `assets/shaders/background.frag`
-  — the animated background shader, isolated in its own `RepaintBoundary`.
-- `lib/mood/` — the five mood cards and the stacking-scroll picker.
-  Cards use a mood-colored gradient border (no skewed glow strips). While
-  the user scrolls, each card gets a tiny GPU-composited wobble derived
-  from the scroll offset — no extra ticker. Landing copy is oversized
-  frosted-glass type that picks up the five mood colors on hover.
+  `HomeShell`: an ambient background layer (`ShaderBackground` / `FlowerVideoBackground`) behind a foreground that swaps between
+  the mood picker and the results page.
+- `lib/background/` — background renderers:
+  - `flower_video_background.dart` — blooming flower background controller and shader-like gradient integration.
+  - `shader_background.dart` + `assets/shaders/background.frag` — the animated GLSL fragment shader background, isolated in its own `RepaintBoundary`.
+- `lib/mood/` — the five mood cards and the stacking-scroll picker (`MoodStackPage`, `MoodCard`, `HeroPrompt`).
+  Cards use a mood-colored gradient border. While the user scrolls, each card gets a tiny GPU-composited wobble derived from the scroll offset.
 - `lib/results/` — `ResultsRepository` interface + `StaticResultsRepository`
-  (Vercel-shaped sample data) and the results page.
+  and `ResultsPage` (categorized horizontal carousels for Movies & TV, Music, and Games).
+- `anti-frontend-only/` (at repo root) — standalone **Kinetic Grid** HTML5/Canvas editorial web frontend with real-time warp physics and audio/visual controls.
 
 ## Prerequisites
 

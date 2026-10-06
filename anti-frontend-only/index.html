@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>State of Mind | Kinetic Grid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Ultra Bold Modern Grotesk & Editorial Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;1,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Animated Radial Breathing Gradient (Red & Crimson Shades) -->
+  <div class="breathing-bg-container">
+    <div class="void-base"></div>
+    <div class="radial-breathing-arc arc-outer" id="arcOuter"></div>
+    <div class="radial-breathing-arc arc-mid" id="arcMid"></div>
+    <div class="radial-breathing-arc arc-core" id="arcCore"></div>
+    <div class="subtle-grain"></div>
+  </div>
+
+  <!-- Interactive Kinetic Warping Grid (Canvas) -->
+  <canvas id="kineticGridCanvas"></canvas>
+
+  <!-- Cursor Light Halo -->
+  <div class="cursor-glow" id="cursorGlow"></div>
+
+  <!-- 3D Perspective Stage -->
+  <main class="perspective-stage" id="stage">
+    
+    <!-- Editorial Layout Container with Smooth 3D Parallax Movement -->
+    <div class="editorial-frame" id="editorialFrame">
+      <div class="frame-content">
+        
+        <!-- Header -->
+        <header class="editorial-header">
+          <div class="brand-tag">
+            <span class="status-pulse"></span>
+            <span class="brand-title">KINETIC GRID // 01</span>
+          </div>
+          <div class="header-nav">
+            <span class="meta-label">WARP TILT:</span>
+            <span class="meta-val" id="coordsReadout">0.00° / 0.00°</span>
+          </div>
+        </header>
+
+        <!-- Main Fat Bold Transparent Typography Section -->
+        <section class="typography-hero">
+          <p class="eyebrow-text">Move your cursor. Click anywhere.</p>
+          
+          <!-- Big, Fatter, Bolder, Clean Transparent Title -->
+          <div class="title-group" id="titleGroup">
+            <div class="title-row row-1">
+              <span class="word-fat transparent-title">STATE</span>
+              <span class="sub-particle">OF</span>
+            </div>
+            <div class="title-row row-2">
+              <span class="word-fat transparent-title">MIND</span>
+            </div>
+          </div>
+
+          <p class="manifesto-text">
+            A serene kinetic mesh weaving subtle dusty rose and warm cream tones against velvety burgundy shadows.
+          </p>
+        </section>
+
+        <!-- Red-Amber Glowing Frosted Glass Block (Navigation) -->
+        <div class="glowing-glass-block catalog-block" id="catalogBlock">
+          <div class="block-glow-accent"></div>
+          <div class="catalog-header">
+            <span class="block-icon">@</span>
+            <span class="catalog-heading">Navigation</span>
+          </div>
+          <ul class="catalog-list">
+            <li class="catalog-item active"><span class="num">01</span> <span class="txt">Kinetic Mesh</span><span class="indicator-dot"></span></li>
+            <li class="catalog-item"><span class="num">02</span> <span class="txt">Subtle Warp</span><span class="indicator-dot"></span></li>
+            <li class="catalog-item"><span class="num">03</span> <span class="txt">Harmonic Wave</span><span class="indicator-dot"></span></li>
+            <li class="catalog-item"><span class="num">04</span> <span class="txt">Continuum</span><span class="indicator-dot"></span></li>
+          </ul>
+          <div class="block-hint">[ CLICK TO EMIT SILK RIPPLE ]</div>
+        </div>
+
+        <!-- Footer with Red-Amber Glowing Controls Block -->
+        <footer class="editorial-footer">
+          <div class="footer-note">
+            <span>PERSPECTIVE SHIFT ACTIVE</span>
+          </div>
+          
+          <!-- Red-Amber Glowing Frosted Controls Block -->
+          <div class="glowing-glass-block controls-block">
+            <div class="block-glow-accent"></div>
+            <div class="interactive-controls">
+              <button class="pill-btn" id="btnWarpForce">
+                <span class="btn-dot"></span> Mesh Pull: <span id="warpModeLabel">Subtle</span> <span class="chevron">▾</span>
+              </button>
+              <button class="pill-btn" id="btnPulseTempo">
+                <span class="btn-dot"></span> Horizon Tempo <span class="chevron">▾</span>
+              </button>
+              <button class="pill-btn" id="btnAudioMood">
+                <span class="btn-dot"></span> Ambient Drone
+              </button>
+              <button class="pill-btn icon-only" id="btnShockwave" title="Trigger Shockwave">
+                <span class="arrow-up">↑</span>
+              </button>
+            </div>
+          </div>
+        </footer>
+
+      </div>
+    </div>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
+

@@ -24,7 +24,7 @@ Not an empty 200, not a fallback set of generic recommendations.
 
 **The contract:** on a 404, the frontend sends the user back to the mood-picker screen. There is no partial or degraded state to render, so there's no point designing an empty-results view.
 
-Not yet implemented — this is stage 6. See [05-BACKEND.md](05-BACKEND.md).
+Implemented in `app.py` (Stage 6) using `ALLOWED_MOODS` validation and `abort(404, description="Invalid mood")`. See [05-BACKEND.md](05-BACKEND.md).
 
 ---
 
@@ -189,3 +189,16 @@ All three harvesters read `DB_NAME` and `DB_SSL_CA` and set `ssl_verify_cert=Tru
 **Why:** Aiven requires verified SSL. Leaving harvesters on a bare connect (or a hardcoded database name) meant games/music could fail on teammates' machines even when the runners worked, and a non-default `DB_NAME` would silently point the API at one database and the harvesters at another.
 
 **The cost:** every device must have a valid `DB_SSL_CA` path in `.env` (the repo ships `ignore/ca.pem`). That was already true for runners and `app.py`.
+
+---
+
+## Multiple frontends explored; Blooming Flower designated as flagship UI
+
+**Decision:** Build and maintain 3 frontend implementations, with the **Blooming Flower** Flutter app serving as the primary/flagship interface for demos and teacher presentations.
+
+**Why:**
+1. Exploring different visual paradigms (organic bloom video blending vs GLSL shader cards vs kinetic typography/grid canvas) allowed the team to evaluate mood-matching immersion in practice.
+2. The Blooming Flower UI provides an emotionally resonant aesthetic that complements the mood theme, using seamless video integration (`flower_video_background.dart`), fluid gradient matching, and custom script typography.
+3. Keeping the alternative Shader Card Stack (`frontend/`) and the Kinetic Grid Canvas (`anti-frontend-only/`) ensures multiple platform targets (native desktop/mobile and standalone web) remain demonstrable.
+
+**The cost:** Maintaining visual parity across experimental designs, though all frontends align strictly with the 5-mood API contract.

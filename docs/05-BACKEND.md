@@ -11,8 +11,8 @@ A Flask app in `app.py`, being built deliberately as a seven-stage learning exer
 | 3 | Live connection to the cloud DB from inside a request | Done |
 | 4 | The full mood → genre → items join, wired into the live route | Done |
 | 5 | Shaping the response: dedupe, bucket into movies_tv / music / games, cap at top 5 each | Done |
-| 6 | Error handling — 404 on invalid or missing mood | Not started |
-| 7 | Testing the API standalone, without the frontend | Not started |
+| 6 | Error handling — 404 on invalid or missing mood (`ALLOWED_MOODS`) | Done |
+| 7 | Testing the API standalone, without the frontend | In progress / Next |
 
 ## What exists today
 
@@ -20,7 +20,7 @@ Two routes.
 
 `GET /` returns `{"message": "State of Mind backend is running"}`.
 
-`GET /get-state?mood=<name>` reads the mood, opens a MySQL connection inside a `try`/`finally` (the cursor and connection always close), runs the join, then shapes the rows and returns a dict. Flask serialises that dict as JSON.
+`GET /get-state?mood=<name>` validates the mood parameter against `ALLOWED_MOODS`, opens a MySQL connection inside a `try`/`finally` (the cursor and connection always close), runs the join, then shapes the rows and returns a dict. Flask serialises that dict as JSON.
 
 The SELECT pulls `items.id` first, then title, media type, popularity, and relevance. The mood is a **string** (`?mood=Happy/Excitement`), matched against `moods.name`, not a numeric ID. That's a deliberate decision tied to the fixed five-button frontend — see [08-DECISIONS.md](08-DECISIONS.md).
 
@@ -36,7 +36,6 @@ The join still produces one row per matching genre. Shaping happens in Python af
 
 ```json
 {
-  "mood": "Happy/Excitement",
   "movies_tv": [
     {
       "id": 1,
@@ -46,24 +45,50 @@ The join still produces one row per matching genre. Shaping happens in Python af
       "relevance_score": 0.93
     }
   ],
-  "music": [],
-  "games": []
+  "music": [
+    {
+      "id": 61,
+      "title": "Track Title",
+      "media_type": "music",
+      "popularity_score": 850000.0,
+      "relevance_score": 0.93
+    }
+  ],
+  "games": [
+    {
+      "id": 41,
+      "title": "Game Title",
+      "media_type": "game",
+      "popularity_score": 12500.0,
+      "relevance_score": 0.93
+    }
+  ]
 }
 ```
 
-`music` and `games` are empty until those harvesters have run. With the current 40 movie/TV items, only `movies_tv` has rows.
+Live harvests have now run across all three sources (TMDB, RAWG, Deezer), populating all three category buckets in the cloud database.
 
 `test_query.py` is the earlier prototype of the dedupe. It still keys on **title** and prints a dict; it is not what `/get-state` runs. The live function keys on item id, which avoids collapsing a film and a track that happen to share a title.
 
-## Stage 6 — error handling, not started
+## Stage 6 — error handling (Complete)
 
-The intended behaviour is a **404** for an invalid, unrecognised, or missing mood, on which the frontend sends the user back to the mood-picker screen. See [08-DECISIONS.md](08-DECISIONS.md) for the reasoning.
+Implemented in `app.py`. The backend defines the set of supported moods:
 
-Nothing is implemented yet. Today, `request.args.get("mood")` returns `None` when the parameter is absent, the join matches nothing, and the route returns HTTP 200 with three empty buckets and `"mood": null`. A misspelt mood does the same, with the bad string echoed back in `"mood"`.
+```python
+ALLOWED_MOODS = {
+    "Happy/Excitement",
+    "Calm/Serene",
+    "Sad/Melancholy",
+    "Anger/Rage",
+    "Confusion/Anxiety",
+}
+```
 
-## Stage 7 — standalone testing, not started
+When `request.args.get("mood")` is missing or contains any value outside `ALLOWED_MOODS`, the route immediately raises `abort(404, description="Invalid mood")` before initiating any database connection.
 
-The API is to be exercised on its own, without waiting on the Flutter app — which matters, given the frontend has zero code and the mood-picker UI doesn't exist to click.
+## Stage 7 — standalone testing
+
+The API can be exercised standalone via HTTP requests (e.g., `curl` or browser query) as well as integrated directly with the frontends.
 
 ## Running it
 
