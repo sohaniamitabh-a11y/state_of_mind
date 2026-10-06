@@ -11,7 +11,9 @@ venv/
 # Java
 *.class
 
-# OS / editor junk
+# OS / editor junk & AI tooling
 .DS_Store
 Thumbs.db
 .vscode/
+.cursor/
+.agents/
