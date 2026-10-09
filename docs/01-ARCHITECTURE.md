@@ -13,17 +13,17 @@ WRITE PATH (offline, scheduled, one device per source)
 
 READ PATH (online, per user request)
 ───────────────────────────────────
-  Flutter app ──▶ GET /get-state?mood=Happy/Excitement
-                        │
-                        ▼
-                   Flask (app.py)
-                        │
-                        ▼
-              one SQL join across
-      moods → mood_genre_mapping → item_genres → items
-                        │
-                        ▼
-              ranked recommendations
+  Client (Planned) ──▶ GET /get-state?mood=Happy/Excitement
+                            │
+                            ▼
+                       Flask (app.py)
+                            │
+                            ▼
+                  one SQL join across
+          moods → mood_genre_mapping → item_genres → items
+                            │
+                            ▼
+                  ranked recommendations
 ```
 
 ## The four components
@@ -54,17 +54,11 @@ The judgement of which genres fit a mood still lives only in the Brain table. Af
 
 Status: stage 6 of 7 done. Details in [05-BACKEND.md](05-BACKEND.md).
 
-### 4. Frontend — Three Visual Implementations (Blooming Flower Flagship)
+### 4. Frontend — planned client application
 
-The user interface presents the five fixed mood options without free-text input. This constraint is load-bearing: because the UI emits only one of five exact strings, the API takes the mood as a name rather than a numeric ID, and any unmatched mood is a genuine error rather than a search miss. See [08-DECISIONS.md](08-DECISIONS.md).
+Five fixed mood buttons, no free-text input. This constraint is load-bearing: because the UI can only ever emit one of five exact strings, the API takes the mood as a name rather than a numeric ID, and any unmatched mood is a genuine error rather than a search miss. See [08-DECISIONS.md](08-DECISIONS.md).
 
-Rather than a single static design, three frontend implementations were created to test and demonstrate different user experiences:
-
-1. **Blooming Flower Flutter Frontend (Main / Flagship):** The primary production-grade Flutter interface. It utilizes an organic blooming flower video background (`flower_video_background.dart`), fluid gradient blending, delicate serif/script typography, and smooth state transitions upon mood selection.
-2. **Shader & Stacking Cards Flutter Frontend (`frontend/`):** A Flutter implementation featuring an interactive GLSL fragment shader background (`background.frag`), scroll-linked stacking card mechanics (`MoodStackPage`), and categorized horizontal carousels (`ResultsPage`).
-3. **Kinetic Grid Editorial Web Frontend (`anti-frontend-only/`):** A standalone HTML5/Canvas/CSS/JS frontend featuring a real-time kinetic warping grid, radial breathing gradient arcs, cursor halo, 3D perspective tilt, and atmospheric audio/visual controls.
-
-Status: Active. The Blooming Flower Flutter frontend serves as the primary visual interface demonstrated to reviewers and instructors.
+Status: not started, zero progress / zero code.
 
 ## The join that is the engine
 

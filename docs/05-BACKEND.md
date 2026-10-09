@@ -88,7 +88,7 @@ When `request.args.get("mood")` is missing or contains any value outside `ALLOWE
 
 ## Stage 7 — standalone testing
 
-The API can be exercised standalone via HTTP requests (e.g., `curl` or browser query) as well as integrated directly with the frontends.
+The API can be exercised standalone via HTTP requests (e.g., `curl` or browser query) without waiting on a frontend client.
 
 ## Running it
 

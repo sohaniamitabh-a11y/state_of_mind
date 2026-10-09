@@ -12,10 +12,10 @@ How data actually gets into the database, in the order it has to happen. Everyth
  5. mood_genre_mapping_inserts.sql via run_mapping.py → the original 46 Brain rows
  5b. add_other_music_genre.sql via run_add_other_music_genre.py → music Other + 5 Brain rows (total 64 genres, 51 mappings)
  6. harvest_*.py          scheduled, per device     → items + item_genres
- 7. app.py                                          → reads all of the above, serves frontends
+ 7. app.py                                          → reads all of the above, serves recommendations API
 ```
 
-Steps 1 through 5b are done. Step 6 has run live across all three sources (movies/TV, games, music). Step 7's API is through stage 6 of 7: `/get-state` enforces valid moods (returning 404 for invalid/missing values), dedupes by item ID, buckets into `movies_tv` / `music` / `games`, and returns top-5 recommendations per bucket to the frontend clients. Stage 7 (standalone API test suite) is next.
+Steps 1 through 5b are done. Step 6 has run live across all three sources (movies/TV, games, music). Step 7's API is through stage 6 of 7: `/get-state` enforces valid moods (returning 404 for invalid/missing values), dedupes by item ID, buckets into `movies_tv` / `music` / `games`, and returns top-5 recommendations per bucket. Stage 7 (standalone API test suite) is next.
 
 The ordering is enforced by foreign keys, not by convention. `mood_genre_mapping` has FKs to both `moods` and `genres`, so step 5 physically cannot run before steps 2 and 3. `item_genres` has an FK to `genres`, so a harvest can't link an item to a genre that was never seeded.
 

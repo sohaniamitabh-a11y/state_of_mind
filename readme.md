@@ -4,7 +4,7 @@
 [![Issues](https://img.shields.io/github/issues/sohaniamitabh-a11y/state_of_mind)](https://github.com/sohaniamitabh-a11y/state_of_mind/issues)
 [![Flask](https://img.shields.io/badge/Flask-3%2B-black?logo=flask)](https://flask.palletsprojects.com/)
 [![MySQL](https://img.shields.io/badge/MySQL-Aiven-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com/)
-[![Flutter](https://img.shields.io/badge/Flutter-frontend-02569B?logo=flutter&logoColor=white)](https://flutter.dev/)
+[![Frontend](https://img.shields.io/badge/Frontend-Not%20Started-lightgrey)]()
 
 A mood-based cross-media recommendation engine. Pick how you're feeling — the engine hands back Movies, TV, Music, and Games that actually fit that headspace.
 
@@ -31,9 +31,9 @@ WRITE PATH — offline, scheduled at midnight, one device per source
   Deezer ──▶ harvest_music.py      ─┘
 
 READ PATH — per user request
-  Flutter app ──▶ GET /get-state?mood=Happy/Excitement ──▶ Flask
-                     ──▶ one join: moods → mood_genre_mapping → item_genres → items
-                     ──▶ ranked recommendations
+  Client (Planned) ──▶ GET /get-state?mood=Happy/Excitement ──▶ Flask
+                          ──▶ one join: moods → mood_genre_mapping → item_genres → items
+                          ──▶ ranked recommendations
 ```
 
 Ranking is **`relevance_score` first, `popularity_score` only as a tiebreaker** — never averaged together. Mood-fit is the entire point of the app, so a wildly popular but badly-fitting title must not outrank a strong match. Reasoning in [08-DECISIONS.md](docs/08-DECISIONS.md).
@@ -45,7 +45,7 @@ Ranking is **`relevance_score` first, `popularity_score` only as a tiebreaker** 
 | **The Brain** | Done / live | `mood_genre_mapping` — 51 weighted mood-to-genre rows (46 from team ratings + 5 for music `Other`). 74 more queued, awaiting survey results |
 | **The Harvester** | Partial | All three have run live. Games warn on missing `action` slug; music uses aliases + `Other` fallback |
 | **The Backend / Engine** | Stage 6 of 7 | `/get-state` endpoint is wired, deduplicated, bucketed, capped at top 5, and validates moods (rejects invalid moods with 404). Stage 7 (testing) next |
-| **Frontend** | Active (3 Frontends) | 3 frontend implementations created. The **Blooming Flower** Flutter frontend is the main/flagship interface right now. Also includes a **Shader & Stacking Cards** Flutter frontend and a **Kinetic Grid** Web UI (`anti-frontend-only/`) |
+| **Frontend** | Not started | Planned client application — zero progress / no code written yet |
 
 **Live database right now:** 5 moods, 64 genres, 51 Brain rows, 70 items (20 movie / 20 tv / 20 game / 10 music), 119 `item_genres` links, `feedback` empty and unused.
 
@@ -69,11 +69,9 @@ Every file, and what it's for. Files are currently flat in the root; nothing has
 
 ### The application
 
-| File / Folder | Purpose |
+| File | Purpose |
 |---|---|
 | `app.py` | The Flask API. Two routes: `/` liveness, and `/get-state?mood=X` which validates moods and runs the recommendation join |
-| `frontend/` | Flutter frontend package containing the main **Blooming Flower** video background experience, along with the interactive shader background and card stack mood picker |
-| `anti-frontend-only/` | Standalone **Kinetic Grid** HTML5/Canvas editorial web frontend with real-time grid warping and atmospheric controls |
 | `test_query.py` | Earlier prototype of the dedupe, keyed on title and printed to the console. The live path is `remove_duplicates()` in `app.py` |
 
 ### Harvesters — one API each, one device each
@@ -120,7 +118,7 @@ Each runner applies exactly one SQL file to the remote SSL-required database, an
 
 - **Backend:** Python (Flask), MySQL (Aiven cloud, SSL required)
 - **Data sources:** TMDB (movies/TV), RAWG (games), Deezer (music)
-- **Frontend:** Flutter / Dart (featuring the flagship Blooming Flower video background UI & Shader Stacking Cards), HTML5 Canvas / JavaScript (`anti-frontend-only/`)
+- **Frontend:** Planned / Not started (zero progress yet)
 - **Data prep:** Python runner scripts for the schema/seed/mapping SQL; Google Forms for the genre-mood survey ratings
 
 ## Quickstart

@@ -33,13 +33,8 @@ The table above stops at the last noisy commit. Later work on `main` uses the me
 | `9bb1e88` | `harvest_music.py` aliases near-miss Deezer names and falls back to `Other` when a track matches nothing |
 | `1166f68` | Backend stage 5 in `app.py`: dedupe by item id, bucket into `movies_tv` / `music` / `games`, cap at 5, return JSON |
 | `7c57854` | `harvest_*.py` honour `DB_NAME` and Aiven SSL across all three harvesters |
-| `9a70bcd` | Bootstrap Flutter frontend with animated fragment shader background |
-| `61ef5b6` | Scroll-driven stacking cards mood picker in Flutter |
-| `7c2ceb5` | Bordered mood cards, scroll wobble, and glass hero prompt in Flutter |
-| `5cb98f7` | Added standalone **Kinetic Grid** HTML5/Canvas frontend (`anti-frontend-only/`) |
 | `9558289` | Backend stage 6: enforce `ALLOWED_MOODS` and reject invalid/missing moods with HTTP 404 |
 | `1dcc0bc` | Backend: return pure bucketed recommendations payload without echoing mood string |
-| `432e136` | Frontend: integrated the flagship **Blooming Flower** video background frontend experience |
 
 ## What the noise actually costs
 
