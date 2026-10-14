@@ -2,13 +2,15 @@ import os
 
 import mysql.connector
 from dotenv import load_dotenv
-from flask import Flask, abort, request
+from flask import Flask, abort, request, send_from_directory
+from flask_cors import CORS
 
 # Read database settings from the .env file.
 load_dotenv()
 
 # Create the Flask backend application.
 app = Flask(__name__)
+CORS(app)
 
 # Maximum number of recommendations returned per category.
 MAX_ITEMS_PER_BUCKET = 5
@@ -27,6 +29,18 @@ def home():
     return {
         "message": "State of Mind backend is running"
     }
+
+
+@app.route("/frontend/<path:filename>")
+def serve_frontend(filename):
+    """Serve frontend static files and pages."""
+    return send_from_directory("frontend", filename)
+
+
+@app.route("/app")
+def serve_app():
+    """Shortcut to view the frontend application."""
+    return send_from_directory("frontend", "index.html")
 
 
 def remove_duplicates(rows):
@@ -133,18 +147,40 @@ def get_state():
     if mood not in ALLOWED_MOODS:
         abort(404, description="Invalid mood")
 
-    # Connect securely to the Aiven MySQL database.
-    connection = mysql.connector.connect(
-        host=os.getenv("DB_HOST"),
-        port=int(os.getenv("DB_PORT")),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME"),
-        ssl_ca=os.getenv("DB_SSL_CA"),
-        ssl_verify_cert=False,
-    )
+    db_host = os.getenv("DB_HOST")
+    db_port = os.getenv("DB_PORT")
+    if not db_host or not db_port:
+        abort(500, description="Database configuration missing. Please ensure .env contains DB_HOST and DB_PORT.")
+
+    db_name = os.getenv("DB_NAME", "defaultdb")
+    ssl_ca = os.getenv("DB_SSL_CA", "ignore/ca.pem")
+
+    try:
+        # Connect securely to the Aiven MySQL database.
+        connection = mysql.connector.connect(
+            host=db_host,
+            port=int(db_port),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            database=db_name,
+            ssl_ca=ssl_ca,
+            ssl_verify_cert=False,
+        )
+    except Exception as err:
+        print(f"\n[ERROR] Failed to connect to MySQL database: {err}\n")
+        return {"error": f"Database connection error: {err}"}, 500
 
     cursor = connection.cursor()
+
+    # Ensure we use the database containing the tables (defaultdb or state_of_mind)
+    try:
+        cursor.execute("SELECT 1 FROM moods LIMIT 1")
+    except Exception:
+        alt_db = "state_of_mind" if db_name == "defaultdb" else "defaultdb"
+        try:
+            cursor.execute(f"USE {alt_db}")
+        except Exception:
+            pass
 
     try:
         # items.id is selected first because remove_duplicates() expects
@@ -187,10 +223,15 @@ def get_state():
             "games": capped_items["games"],
         }
 
+    except Exception as err:
+        print(f"\n[ERROR] Database query error: {err}\n")
+        return {"error": f"Database query error: {err}"}, 500
+
     finally:
         # Always release database resources.
         cursor.close()
         connection.close()
+
 
 
 # Start Flask when executed directly.

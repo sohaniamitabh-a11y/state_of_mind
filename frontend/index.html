@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#050407">
+<title>State of Mind — Find your feeling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="stage" id="stage">
+  <div class="ambient"></div>
+  <video class="bloom" id="bloom" autoplay muted playsinline preload="auto" aria-label="Abstract digital flower blooming">
+    <source src="assets/bloom.mp4" type="video/mp4">
+  </video>
+  <div class="shade"></div>
+  <header class="topbar">
+    <a class="wordmark" href="#" aria-label="State of Mind home"><img class="wordmark-logo" src="assets/state-of-mind-logo.png" alt=""></a>
+    <span class="edition"><span class="edition-text" id="editionText">SO WHAT'S YOUR STATE OF MIND TODAY?</span><i></i></span>
+  </header>
+
+  <section class="intro" id="intro">
+    <p class="eyebrow"><span class="tiny-star">✳</span> TAKE A BREATH. STAY A WHILE.</p>
+    <h1>We are here <br><em>to hear.</em></h1>
+    <p class="subline">Tell us how you wanna feel, and we bring the best in the world for you.</p>
+    <button class="skip" id="skip">I'm ready <span>↗</span></button>
+  </section>
+
+  <section class="mood-area" id="moodArea" aria-hidden="true">
+    <div class="mood-heading">
+      <h2>We are here to hear.</h2>
+      <p class="hint">Tell us how you wanna feel, and we bring the best in the world for you.</p>
+    </div>
+    <div class="moods" role="group" aria-label="Choose your mood">
+      <button class="mood" data-mood="Happy/Excitement" data-display-name="Happy" style="--accent:#f0c3a9;--wash:rgba(240,195,169,.12)">
+        <span class="number">01</span><span class="mood-symbol">☼</span><span class="mood-name">Happy</span><span class="mood-note">let it glow</span><span class="arrow">↗</span>
+      </button>
+      <button class="mood" data-mood="Calm/Serene" data-display-name="Calm" style="--accent:#b5d2c6;--wash:rgba(181,210,198,.12)">
+        <span class="number">02</span><span class="mood-symbol">≈</span><span class="mood-name">Calm</span><span class="mood-note">stay in the quiet</span><span class="arrow">↗</span>
+      </button>
+      <button class="mood" data-mood="Sad/Melancholy" data-display-name="A little low" style="--accent:#b8c5e6;--wash:rgba(184,197,230,.12)">
+        <span class="number">03</span><span class="mood-symbol">☾</span><span class="mood-name">A little low</span><span class="mood-note">feel it gently</span><span class="arrow">↗</span>
+      </button>
+      <button class="mood" data-mood="Anger/Rage" data-display-name="Frustrated" style="--accent:#e4a3a9;--wash:rgba(228,163,169,.12)">
+        <span class="number">04</span><span class="mood-symbol">✳</span><span class="mood-name">Frustrated</span><span class="mood-note">let it move through</span><span class="arrow">↗</span>
+      </button>
+      <button class="mood" data-mood="Confusion/Anxiety" data-display-name="All over the place" style="--accent:#d2b8e5;--wash:rgba(210,184,229,.12)">
+        <span class="number">05</span><span class="mood-symbol">⁕</span><span class="mood-name">All over the place</span><span class="mood-note">one thing at a time</span><span class="arrow">↗</span>
+      </button>
+    </div>
+    <p class="footnote">YOUR MOOD IS A MOMENT, NOT YOUR WHOLE STORY.</p>
+  </section>
+
+  <section class="response" id="response" aria-live="polite" aria-hidden="true">
+    <button class="back" id="back" aria-label="Go back to mood selection">← all moods</button>
+    <div class="response-header">
+      <p class="eyebrow">YOUR MOMENT, YOUR WAY</p>
+      <h2 id="responseTitle">A little space for you.</h2>
+      <p id="responseCopy">A few things to meet you where you are.</p>
+      <div class="response-line"><span class="response-dot"></span><span id="responseMood">MOOD SELECTED</span><span class="line"></span><span>STATE OF MIND</span></div>
+    </div>
+    <div class="recommendations-container" id="recommendationsContainer">
+      <!-- Recommendations dynamically loaded here -->
+    </div>
+  </section>
+  <div class="bottom-note"><span>MADE FOR THE IN-BETWEEN</span><span>✳ &nbsp; STOP SCROLLING, START FEELING</span></div>
+</main>
+<script src="script.js"></script>
+</body>
+</html>
