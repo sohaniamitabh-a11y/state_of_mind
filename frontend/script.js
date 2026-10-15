@@ -162,6 +162,13 @@ function renderCategory(title, icon, items, categoryKey) {
     const fitPct = Math.round((Number(item.relevance_score) || 0) * 100);
     const popText = formatPopularity(item.popularity_score, item.media_type);
 
+    const isMusic = item.media_type === 'music';
+    const actionLabel = item.action_label || (isMusic ? 'Listen' : 'View');
+    const actionClass = isMusic ? 'action-listen' : 'action-view';
+    const link = item.link || (isMusic
+      ? `https://www.deezer.com/search/${encodeURIComponent(item.title)}`
+      : `https://www.themoviedb.org/search?query=${encodeURIComponent(item.title)}`);
+
     return `
       <article class="rec-card" tabindex="0">
         <div class="rec-card-top">
@@ -169,12 +176,26 @@ function renderCategory(title, icon, items, categoryKey) {
           <span class="rec-badge ${badge.className}">${badge.label}</span>
           <span class="rec-match">${fitPct}% match</span>
         </div>
-        <h4 class="rec-title" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</h4>
+        <div class="rec-card-body">
+          <h4 class="rec-title" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</h4>
+          ${item.artist ? `<p class="rec-artist" title="${escapeHtml(item.artist)}">${escapeHtml(item.artist)}</p>` : ''}
+        </div>
         <div class="rec-card-bottom">
           <div class="match-track" title="${fitPct}% relevance">
             <div class="match-fill" style="width: ${fitPct}%"></div>
           </div>
-          ${popText ? `<span class="rec-meta">${popText}</span>` : ''}
+          <div class="rec-card-footer">
+            ${popText ? `<span class="rec-meta">${popText}</span>` : '<span class="rec-meta"></span>'}
+            <a href="${escapeHtml(link)}"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="rec-action-btn ${actionClass}"
+               title="${actionLabel} &quot;${escapeHtml(item.title)}&quot; in a new tab"
+               aria-label="${actionLabel} ${escapeHtml(item.title)} (opens in a new tab)">
+              <span class="btn-text">${actionLabel}</span>
+              <span class="btn-icon" aria-hidden="true">↗</span>
+            </a>
+          </div>
         </div>
       </article>
     `;
