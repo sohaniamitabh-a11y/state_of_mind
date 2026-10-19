@@ -1,0 +1,228 @@
+From f72f17055b1d65496485a13718939a8205b14e3e Mon Sep 17 00:00:00 2001
+From: "qwen.ai[bot]" <qwenlm-intl@service.alibaba.com>
+Date: Mon, 19 Oct 2026 14:38:05 +0000
+Subject: [PATCH] docs: fix stale frontend badge and centralize live row counts
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- Remove the 'Frontend: Not Started' badge from readme.md — it contradicted
+  the working prototype in frontend/ (script.js calls /get-state). Status is
+  now stated once in the readme Status table and docs, with a comment
+  explaining why no hand-maintained status badge is used.
+- Update frontend status across readme.md, docs/00-OVERVIEW.md, and
+  docs/01-ARCHITECTURE.md to reflect the existing Afterglow prototype.
+- Make docs/02-DATABASE.md the single source of truth for live row counts;
+  readme.md, docs/00-OVERVIEW.md, and CONTRIBUTING.md now link there instead
+  of restating the numbers (four duplicated copies guaranteed drift).
+- check_table.py now prints counts for all six tables (was moods + genres
+  only) so the docs/02 table can be regenerated rather than hand-maintained.
+- CONTRIBUTING.md pre-push check and doc-update rule point at the new
+  single-source-of-truth workflow.
+---
+ CONTRIBUTING.md         |  4 ++--
+ check_table.py          | 14 +++++++++++++-
+ docs/00-OVERVIEW.md     | 13 +++----------
+ docs/01-ARCHITECTURE.md |  6 +++---
+ docs/02-DATABASE.md     |  2 ++
+ readme.md               | 16 ++++++++--------
+ 6 files changed, 31 insertions(+), 24 deletions(-)
+
+diff --git a/CONTRIBUTING.md b/CONTRIBUTING.md
+index ee1e79a..559297d 100644
+--- a/CONTRIBUTING.md
++++ b/CONTRIBUTING.md
+@@ -63,7 +63,7 @@ Be aware that the `ignore/` directory is **not** git-ignored despite its name 
+ 
+ ## Before you push
+ 
+-- `python check_table.py` still connects and reports `moods: 5`, `genres: 64`.
++- `python check_table.py` still connects and prints live counts for all six tables — compare them with [docs/02-DATABASE.md](docs/02-DATABASE.md#live-row-counts).
+ - `python app.py` starts and `/get-state?mood=Happy/Excitement` returns rows.
+ - If you changed SQL, confirm the relevant `run_*.py` applies it cleanly against the shared database, and that re-running it is still a no-op.
+ 
+@@ -73,7 +73,7 @@ The docs in [`/docs`](docs/) state real status, including what's broken and unfi
+ 
+ If your change moves any of these, update the doc in the same commit:
+ 
+-- **Live row counts** — [00-OVERVIEW.md](docs/00-OVERVIEW.md) and [02-DATABASE.md](docs/02-DATABASE.md)
++- **Live row counts** — [02-DATABASE.md](docs/02-DATABASE.md#live-row-counts) is the single source of truth. Update it (from `python check_table.py` output) and leave every other doc linking to it rather than restating numbers.
+ - **A backend stage completing** — [05-BACKEND.md](docs/05-BACKEND.md) and the checklist in [readme.md](readme.md)
+ - **A harvester's status** — [04-HARVESTERS.md](docs/04-HARVESTERS.md)
+ - **A design choice with a trade-off** — add it to [08-DECISIONS.md](docs/08-DECISIONS.md), with the cost you're accepting, not just the reason
+diff --git a/check_table.py b/check_table.py
+index a7e35e4..60f359f 100644
+--- a/check_table.py
++++ b/check_table.py
+@@ -1,9 +1,19 @@
++"""Print live row counts for all six tables.
++
++This script is the single source of truth for the "Live row counts" table in
++docs/02-DATABASE.md. Run it after any harvest or SQL apply and paste the
++output into that table — do not hand-maintain counts anywhere else. Every
++other doc should link to docs/02-DATABASE.md instead of restating numbers.
++"""
+ import os
+ from dotenv import load_dotenv
+ import mysql.connector
+ 
+ load_dotenv()
+ 
++# All six tables defined in schema.sql, in dependency order.
++TABLES = ["moods", "genres", "mood_genre_mapping", "items", "item_genres", "feedback"]
++
+ conn = mysql.connector.connect(
+     host=os.getenv("DB_HOST"),
+     port=int(os.getenv("DB_PORT")),
+@@ -16,7 +26,9 @@ conn = mysql.connector.connect(
+ 
+ cursor = conn.cursor()
+ 
+-for table in ["moods", "genres"]:
++print("# Live row counts — paste this into docs/02-DATABASE.md")
++for table in TABLES:
++    # Table names come from the fixed TABLES list above, never user input.
+     cursor.execute(f"SELECT COUNT(*) FROM {table}")
+     count = cursor.fetchone()[0]
+     print(f"{table}: {count} rows")
+diff --git a/docs/00-OVERVIEW.md b/docs/00-OVERVIEW.md
+index 782a906..7f48538 100644
+--- a/docs/00-OVERVIEW.md
++++ b/docs/00-OVERVIEW.md
+@@ -19,25 +19,18 @@ New moods, new genres, and entirely new media domains are added as new **rows**,
+ | **The Brain** | Done / live | The `mood_genre_mapping` table — a weighted relevance score for every mood-genre pair, derived from human ratings |
+ | **The Harvester** | Partial | Three standalone Python scripts that pull trending content into the `items` cache, one per media source |
+ | **The Backend / Engine** | Stage 6 of 7 done | Flask API. `/get-state?mood=X` joins mood → genre → items, dedupes, buckets into movies_tv / music / games, caps at top 5 each, validates moods with 404 error handling, and returns JSON |
+-| **Frontend** | Not started | Planned client application. Zero progress yet / no code written |
++| **Frontend** | Prototype exists | HTML/CSS/JS "Afterglow" prototype in `frontend/`; `script.js` calls the live `/get-state` endpoint. Visual polish and integration coverage still pending |
+ 
+ ## Where the project actually stands right now
+ 
+-**Live database contents:**
+-
+-- 5 moods
+-- 64 genres (11 music, including fallback `Other`)
+-- 51 `mood_genre_mapping` rows (46 original + 5 for music `Other`; a further 74 rows are queued, waiting on the genre-expansion survey ratings to come back)
+-- 70 items (20 movie, 20 tv, 20 game, 10 music)
+-- `item_genres` at 119 links from those items
+-- `feedback` — empty and unused; the table exists but nothing writes to it
++Live database contents: see **[02-DATABASE.md — Live row counts](02-DATABASE.md#live-row-counts)** (the single source of truth, regenerated by `python check_table.py`). Don't restate those numbers here — duplicated counts go stale.
+ 
+ **Component detail:**
+ 
+ - **Brain:** done and live. The original 46 mapping rows came from the first round of ratings; five more map music `Other` to every mood at low relevance so unmatched Deezer tracks stay recommendable.
+ - **Harvester:** all three have run against live Aiven. Movies/TV remain the original 40. Games harvested 20 RAWG titles but warn on missing `action` slug (4 games ended with zero genre links). Music harvested 10 Deezer chart tracks; one fell back to `Other`.
+ - **Backend:** stage 6 of 7 is complete in `app.py`. The join returns matching rows by genre; `remove_duplicates()` keeps the highest relevance per item id, `group_items_by_media()` splits those into `movies_tv` / `music` / `games`, and `cap_each_bucket()` keeps the top 5 of each. `app.py` enforces `ALLOWED_MOODS`, returning HTTP 404 on invalid or missing moods. The route returns pure category buckets as JSON. Stage 7 (standalone API test suite) is next. `test_query.py` is the earlier title-keyed prototype of the dedupe; the live path no longer depends on it.
+-- **Frontend:** not started (zero progress yet).
++- **Frontend:** "Afterglow" prototype exists in `frontend/` and calls `/get-state`; still pre-production (no tests, polish pending).
+ 
+ ## Team and division of work
+ 
+diff --git a/docs/01-ARCHITECTURE.md b/docs/01-ARCHITECTURE.md
+index ee0ceb5..4b560cb 100644
+--- a/docs/01-ARCHITECTURE.md
++++ b/docs/01-ARCHITECTURE.md
+@@ -13,7 +13,7 @@ WRITE PATH (offline, scheduled, one device per source)
+ 
+ READ PATH (online, per user request)
+ ───────────────────────────────────
+-  Client (Planned) ──▶ GET /get-state?mood=Happy/Excitement
++  Client (frontend/) ──▶ GET /get-state?mood=Happy/Excitement
+                             │
+                             ▼
+                        Flask (app.py)
+@@ -54,11 +54,11 @@ The judgement of which genres fit a mood still lives only in the Brain table. Af
+ 
+ Status: stage 6 of 7 done. Details in [05-BACKEND.md](05-BACKEND.md).
+ 
+-### 4. Frontend — planned client application
++### 4. Frontend — "Afterglow" prototype (`frontend/`)
+ 
+ Five fixed mood buttons, no free-text input. This constraint is load-bearing: because the UI can only ever emit one of five exact strings, the API takes the mood as a name rather than a numeric ID, and any unmatched mood is a genuine error rather than a search miss. See [08-DECISIONS.md](08-DECISIONS.md).
+ 
+-Status: not started, zero progress / zero code.
++Status: prototype exists — `index.html` / `style.css` / `script.js`, with `script.js` calling `/get-state`. Still pre-production: no tests, polish pending.
+ 
+ ## The join that is the engine
+ 
+diff --git a/docs/02-DATABASE.md b/docs/02-DATABASE.md
+index c46811f..71b59a8 100644
+--- a/docs/02-DATABASE.md
++++ b/docs/02-DATABASE.md
+@@ -4,6 +4,8 @@ Cloud-hosted Aiven MySQL, database name `state_of_mind`, SSL required. Defined i
+ 
+ ## Live row counts
+ 
++**This table is the single source of truth for row counts in the whole repo.** Every other doc (readme, 00-OVERVIEW, CONTRIBUTING) links here instead of restating numbers. Regenerate it — don't hand-maintain it: run `python check_table.py`, which prints live counts for all six tables, and update this table in the same commit as whatever changed the data.
++
+ | Table | Rows right now | Note |
+ |---|---|---|
+ | `moods` | 5 | Complete; the five moods are fixed |
+diff --git a/readme.md b/readme.md
+index 693a4da..119cd79 100644
+--- a/readme.md
++++ b/readme.md
+@@ -4,7 +4,7 @@
+ [![Issues](https://img.shields.io/github/issues/sohaniamitabh-a11y/state_of_mind)](https://github.com/sohaniamitabh-a11y/state_of_mind/issues)
+ [![Flask](https://img.shields.io/badge/Flask-3%2B-black?logo=flask)](https://flask.palletsprojects.com/)
+ [![MySQL](https://img.shields.io/badge/MySQL-Aiven-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com/)
+-[![Frontend](https://img.shields.io/badge/Frontend-Not%20Started-lightgrey)]()
++<!-- No frontend status badge here on purpose: hand-maintained badges go stale. Frontend status lives in the Status table below (and in docs/00-OVERVIEW.md), updated in the same commit as the code. -->
+ 
+ A mood-based cross-media recommendation engine. Pick how you're feeling — the engine hands back Movies, TV, Music, and Games that actually fit that headspace.
+ 
+@@ -31,7 +31,7 @@ WRITE PATH — offline, scheduled at midnight, one device per source
+   Deezer ──▶ harvest_music.py      ─┘
+ 
+ READ PATH — per user request
+-  Client (Planned) ──▶ GET /get-state?mood=Happy/Excitement ──▶ Flask
++  Client (frontend/) ──▶ GET /get-state?mood=Happy/Excitement ──▶ Flask
+                           ──▶ one join: moods → mood_genre_mapping → item_genres → items
+                           ──▶ ranked recommendations
+ ```
+@@ -42,12 +42,12 @@ Ranking is **`relevance_score` first, `popularity_score` only as a tiebreaker**
+ 
+ | Component | Status | Detail |
+ |---|---|---|
+-| **The Brain** | Done / live | `mood_genre_mapping` — 51 weighted mood-to-genre rows (46 from team ratings + 5 for music `Other`). 74 more queued, awaiting survey results |
++| **The Brain** | Done / live | `mood_genre_mapping` — weighted mood-to-genre rows from team ratings + music `Other` fallback. More rows queued, awaiting survey results |
+ | **The Harvester** | Partial | All three have run live. Games warn on missing `action` slug; music uses aliases + `Other` fallback |
+ | **The Backend / Engine** | Stage 6 of 7 | `/get-state` endpoint is wired, deduplicated, bucketed, capped at top 5, and validates moods (rejects invalid moods with 404). Stage 7 (testing) next |
+-| **Frontend** | Not started | Planned client application — zero progress / no code written yet |
++| **Frontend** | Prototype exists | `frontend/` — HTML/CSS/JS "Afterglow" prototype whose `script.js` calls `/get-state`. Visual polish and integration coverage still pending |
+ 
+-**Live database right now:** 5 moods, 64 genres, 51 Brain rows, 70 items (20 movie / 20 tv / 20 game / 10 music), 119 `item_genres` links, `feedback` empty and unused.
++Live row counts have one source of truth: **[docs/02-DATABASE.md](docs/02-DATABASE.md)**, regenerated by running `python check_table.py` (prints all six tables). Don't restate those numbers here — duplicated counts go stale.
+ 
+ ### Backend stages
+ 
+@@ -103,7 +103,7 @@ Each runner applies exactly one SQL file to the remote SSL-required database, an
+ | `run_expand_genres.py` | `expand_genres.sql` |
+ | `run_mapping.py` | `mood_genre_mapping_inserts.sql` |
+ | `run_add_other_music_genre.py` | `add_other_music_genre.sql` |
+-| `check_table.py` | Nothing — prints row counts for `moods` and `genres` as a sanity check |
++| `check_table.py` | Nothing — prints live row counts for **all six tables**; the source of truth for [docs/02-DATABASE.md](docs/02-DATABASE.md) |
+ 
+ ### Other
+ 
+@@ -118,7 +118,7 @@ Each runner applies exactly one SQL file to the remote SSL-required database, an
+ 
+ - **Backend:** Python (Flask), MySQL (Aiven cloud, SSL required)
+ - **Data sources:** TMDB (movies/TV), RAWG (games), Deezer (music)
+-- **Frontend:** Planned / Not started (zero progress yet)
++- **Frontend:** HTML/CSS/JS prototype in `frontend/` ("Afterglow"), calling the live `/get-state` API
+ - **Data prep:** Python runner scripts for the schema/seed/mapping SQL; Google Forms for the genre-mood survey ratings
+ 
+ ## Quickstart
+@@ -144,7 +144,7 @@ Each device only needs the one key for its own harvester: `TMDB_API_KEY` for mov
+ Verify the connection, then run the API:
+ 
+ ```bash
+-python check_table.py     # expect: moods: 5, genres: 64
++python check_table.py     # prints live row counts for all six tables (compare with docs/02-DATABASE.md)
+ python app.py             # then try /get-state?mood=Happy/Excitement
+ ```
+ 
+-- 
+2.39.5
+

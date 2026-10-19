@@ -63,7 +63,7 @@ Be aware that the `ignore/` directory is **not** git-ignored despite its name �
 
 ## Before you push
 
-- `python check_table.py` still connects and reports `moods: 5`, `genres: 64`.
+- `python check_table.py` still connects and prints live counts for all six tables — compare them with [docs/02-DATABASE.md](docs/02-DATABASE.md#live-row-counts).
 - `python app.py` starts and `/get-state?mood=Happy/Excitement` returns rows.
 - If you changed SQL, confirm the relevant `run_*.py` applies it cleanly against the shared database, and that re-running it is still a no-op.
 
@@ -73,7 +73,7 @@ The docs in [`/docs`](docs/) state real status, including what's broken and unfi
 
 If your change moves any of these, update the doc in the same commit:
 
-- **Live row counts** — [00-OVERVIEW.md](docs/00-OVERVIEW.md) and [02-DATABASE.md](docs/02-DATABASE.md)
+- **Live row counts** — [02-DATABASE.md](docs/02-DATABASE.md#live-row-counts) is the single source of truth. Update it (from `python check_table.py` output) and leave every other doc linking to it rather than restating numbers.
 - **A backend stage completing** — [05-BACKEND.md](docs/05-BACKEND.md) and the checklist in [readme.md](readme.md)
 - **A harvester's status** — [04-HARVESTERS.md](docs/04-HARVESTERS.md)
 - **A design choice with a trade-off** — add it to [08-DECISIONS.md](docs/08-DECISIONS.md), with the cost you're accepting, not just the reason

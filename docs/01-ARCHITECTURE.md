@@ -13,7 +13,7 @@ WRITE PATH (offline, scheduled, one device per source)
 
 READ PATH (online, per user request)
 ───────────────────────────────────
-  Client (Planned) ──▶ GET /get-state?mood=Happy/Excitement
+  Client (frontend/) ──▶ GET /get-state?mood=Happy/Excitement
                             │
                             ▼
                        Flask (app.py)
@@ -54,11 +54,11 @@ The judgement of which genres fit a mood still lives only in the Brain table. Af
 
 Status: stage 6 of 7 done. Details in [05-BACKEND.md](05-BACKEND.md).
 
-### 4. Frontend — planned client application
+### 4. Frontend — "Afterglow" prototype (`frontend/`)
 
 Five fixed mood buttons, no free-text input. This constraint is load-bearing: because the UI can only ever emit one of five exact strings, the API takes the mood as a name rather than a numeric ID, and any unmatched mood is a genuine error rather than a search miss. See [08-DECISIONS.md](08-DECISIONS.md).
 
-Status: not started, zero progress / zero code.
+Status: prototype exists — `index.html` / `style.css` / `script.js`, with `script.js` calling `/get-state`. Still pre-production: no tests, polish pending.
 
 ## The join that is the engine
 
