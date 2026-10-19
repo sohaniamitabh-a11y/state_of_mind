@@ -4,6 +4,8 @@ Cloud-hosted Aiven MySQL, database name `state_of_mind`, SSL required. Defined i
 
 ## Live row counts
 
+**This table is the single source of truth for row counts in the whole repo.** Every other doc (readme, 00-OVERVIEW, CONTRIBUTING) links here instead of restating numbers. Regenerate it — don't hand-maintain it: run `python check_table.py`, which prints live counts for all six tables, and update this table in the same commit as whatever changed the data.
+
 | Table | Rows right now | Note |
 |---|---|---|
 | `moods` | 5 | Complete; the five moods are fixed |
