@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>State of Mind — My Journal</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-title">
+        <span class="brand-badge">State of Mind</span>
+        <h1>My Entertainment Journal</h1>
+        <p>A personal scrapbook of everything you've watched, played, and listened to.</p>
+      </div>
+      <div class="header-actions">
+        <button id="btn-sample-data" class="btn btn-secondary">⚡ Load Samples</button>
+        <button id="btn-export-json" class="btn btn-secondary">💾 Export JSON</button>
+        <button id="btn-import-json" class="btn btn-secondary">📥 Import JSON</button>
+        <button id="btn-new-collection" class="btn btn-secondary">📁 + Collection</button>
+        <button id="btn-new-entry" class="btn btn-primary">+ Add New Entry</button>
+      </div>
+    </header>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="file-import-input" accept=".json" style="display: none;" />
+
+    <!-- Stats Ribbon -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-label">Total Logged</span>
+        <span class="stat-value" id="stat-total">0</span>
+        <span class="stat-subtext" id="stat-media-breakdown">0 movies • 0 music • 0 games</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Explored (History)</span>
+        <span class="stat-value" id="stat-history">0</span>
+        <span class="stat-subtext">Completed items</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Want to Explore</span>
+        <span class="stat-value" id="stat-wishlist">0</span>
+        <span class="stat-subtext">Future queue</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Collections</span>
+        <span class="stat-value" id="stat-collections">0</span>
+        <span class="stat-subtext">Custom lists</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Top Mood</span>
+        <span class="stat-value" id="stat-top-mood" style="font-size: 1.15rem; margin-top: 8px;">—</span>
+        <span class="stat-subtext">Most frequent headspace</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Average Rating</span>
+        <span class="stat-value" id="stat-avg-rating">—</span>
+        <span class="stat-subtext">Across rated items</span>
+      </div>
+    </section>
+
+    <!-- Search & Filter Controls -->
+    <section class="controls-card" id="controls-section">
+      <div class="controls-row">
+        <div class="search-input-wrapper">
+          <input
+            type="text"
+            id="search-input"
+            class="search-input"
+            placeholder="Search by title, creator, or personal notes..."
+          />
+        </div>
+        <select id="filter-media" class="filter-select">
+          <option value="all">All Media Types</option>
+          <option value="movie">Movies</option>
+          <option value="tv">TV Shows</option>
+          <option value="music">Music</option>
+          <option value="game">Games</option>
+        </select>
+        <select id="filter-mood" class="filter-select">
+          <option value="all">All Moods</option>
+          <option value="Happy/Excitement">Happy / Excitement</option>
+          <option value="Calm/Serene">Calm / Serene</option>
+          <option value="Sad/Melancholy">Sad / Melancholy</option>
+          <option value="Anger/Rage">Anger / Rage</option>
+          <option value="Confusion/Anxiety">Confusion / Anxiety</option>
+        </select>
+        <select id="filter-collection" class="filter-select">
+          <option value="all">All Collections</option>
+        </select>
+        <select id="filter-sort" class="filter-select">
+          <option value="dateExperienced:desc">Newest Experienced</option>
+          <option value="dateExperienced:asc">Oldest Experienced</option>
+          <option value="rating:desc">Highest Rated</option>
+          <option value="title:asc">Title (A-Z)</option>
+          <option value="createdAt:desc">Recently Added</option>
+        </select>
+      </div>
+
+      <!-- View Tabs -->
+      <div class="tabs-bar">
+        <button class="tab-btn active" data-status="all">All Items</button>
+        <button class="tab-btn" data-status="experienced">📜 History (Experienced)</button>
+        <button class="tab-btn" data-status="wishlist">🎯 Explore Later (Wishlist)</button>
+        <button class="tab-btn" data-status="favorites">❤️ Favorites Only</button>
+        <button class="tab-btn" data-status="collections">📁 Collections</button>
+      </div>
+    </section>
+
+    <!-- Journal Cards Scrapbook Grid -->
+    <main id="journal-grid" class="scrapbook-grid">
+      <!-- Injected by JavaScript -->
+    </main>
+  </div>
+
+  <!-- Add / Edit Entry Modal -->
+  <div id="entry-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title">Record New Memory</h2>
+        <button id="modal-close-btn" class="close-btn">&times;</button>
+      </div>
+      <form id="entry-form">
+        <input type="hidden" id="entry-id" />
+
+        <div class="form-group">
+          <label for="form-title">Title *</label>
+          <input type="text" id="form-title" class="form-control" required placeholder="e.g. Spirited Away, Elden Ring, Daft Punk" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="form-media-type">Media Type *</label>
+            <select id="form-media-type" class="form-control" required>
+              <option value="movie">Movie</option>
+              <option value="tv">TV Show</option>
+              <option value="music">Music</option>
+              <option value="game">Game</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="form-status">Status</label>
+            <select id="form-status" class="form-control">
+              <option value="experienced">Experienced (Log to History)</option>
+              <option value="wishlist">Want to Explore Later</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="form-mood">Mood (Headspace)</label>
+            <select id="form-mood" class="form-control">
+              <option value="">No Mood Selected</option>
+              <option value="Happy/Excitement">Happy / Excitement</option>
+              <option value="Calm/Serene">Calm / Serene</option>
+              <option value="Sad/Melancholy">Sad / Melancholy</option>
+              <option value="Anger/Rage">Anger / Rage</option>
+              <option value="Confusion/Anxiety">Confusion / Anxiety</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="form-rating">Rating (0 - 5 Stars)</label>
+            <input type="number" id="form-rating" class="form-control" min="0" max="5" step="0.5" placeholder="e.g. 4.5" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="form-date">Date Experienced</label>
+            <input type="date" id="form-date" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="form-creator">Creator / Artist (Optional)</label>
+            <input type="text" id="form-creator" class="form-control" placeholder="e.g. Director, Band, Developer" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="form-notes">Personal Reflections & Notes</label>
+          <textarea id="form-notes" class="form-control" placeholder="Write your thoughts, memorable scenes, lyrics, or reflections..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="form-favorite" />
+            <span>Mark as Favorite ❤️</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label>Assign to Custom Collections (Optional)</label>
+          <div id="form-collections-list" class="checkbox-list">
+            <!-- Injected dynamically -->
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="btn-cancel-modal" class="btn btn-ghost">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Entry</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Create / Rename Collection Modal -->
+  <div id="collection-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="collection-modal-title">Create New Collection</h2>
+        <button id="collection-modal-close-btn" class="close-btn">&times;</button>
+      </div>
+      <form id="collection-form">
+        <input type="hidden" id="collection-id" />
+
+        <div class="form-group">
+          <label for="collection-name">Collection Name *</label>
+          <input type="text" id="collection-name" class="form-control" required placeholder="e.g. Spooky Night, Chill Sunday, Road Trip Beats" />
+        </div>
+
+        <div class="form-group">
+          <label for="collection-description">Description (Optional)</label>
+          <textarea id="collection-description" class="form-control" placeholder="What is the mood, theme, or intention for this collection?"></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="btn-cancel-collection-modal" class="btn btn-ghost">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Collection</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Manage Item Collections Modal -->
+  <div id="item-collections-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="item-collections-title">Manage Collections</h2>
+        <button id="item-collections-close-btn" class="close-btn">&times;</button>
+      </div>
+      <form id="item-collections-form">
+        <input type="hidden" id="target-item-id" />
+        <p id="target-item-info" style="color: var(--text-muted); margin-bottom: 14px; font-size: 0.95rem;"></p>
+        <div class="form-group">
+          <label>Include in Collections:</label>
+          <div id="item-collections-checklist" class="checkbox-list">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="btn-cancel-item-collections" class="btn btn-ghost">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Load Core Journal Service -->
+  <script src="journal.js"></script>
+
+  <!-- Harness Controller -->
+  <script>
+    (async function () {
+      // --- LOADING OVERLAY (shown during async backend init/sync) ---
+      const loadingOverlay = document.createElement('div');
+      loadingOverlay.id = 'loading-overlay';
+      loadingOverlay.innerHTML = '<div class="loading-spinner"><p>Connecting to your journal…</p></div>';
+      loadingOverlay.style.cssText = [
+        'position:fixed;inset:0;background:rgba(15,15,25,0.82);',
+        'display:flex;align-items:center;justify-content:center;z-index:9999;',
+        'color:#e2e8f0;font-size:1.1rem;letter-spacing:.03em;'
+      ].join('');
+      document.body.appendChild(loadingOverlay);
+
+      // Initialize — awaiting so the grid renders AFTER sync completes
+      try {
+        await Journal.init({ seedIfEmpty: true });
+      } catch (e) {
+        console.warn('[UI] Journal init error (continuing in offline mode):', e);
+      } finally {
+        loadingOverlay.remove();
+      }
+
+      // State for search, filter & collections
+      let currentFilterStatus = 'all'; // 'all', 'experienced', 'wishlist', 'favorites', 'collections'
+      let activeCollectionId = null;
+
+      // DOM Elements
+      const grid = document.getElementById('journal-grid');
+      const searchInput = document.getElementById('search-input');
+      const filterMedia = document.getElementById('filter-media');
+      const filterMood = document.getElementById('filter-mood');
+      const filterCollection = document.getElementById('filter-collection');
+      const filterSort = document.getElementById('filter-sort');
+      const tabButtons = document.querySelectorAll('.tab-btn');
+      const controlsSection = document.getElementById('controls-section');
+
+      // Stats Elements
+      const statTotal = document.getElementById('stat-total');
+      const statMediaBreakdown = document.getElementById('stat-media-breakdown');
+      const statHistory = document.getElementById('stat-history');
+      const statWishlist = document.getElementById('stat-wishlist');
+      const statCollections = document.getElementById('stat-collections');
+      const statTopMood = document.getElementById('stat-top-mood');
+      const statAvgRating = document.getElementById('stat-avg-rating');
+
+      // Entry Modal Elements
+      const modal = document.getElementById('entry-modal');
+      const modalTitle = document.getElementById('modal-title');
+      const entryForm = document.getElementById('entry-form');
+      const entryId = document.getElementById('entry-id');
+      const formTitle = document.getElementById('form-title');
+      const formMediaType = document.getElementById('form-media-type');
+      const formStatus = document.getElementById('form-status');
+      const formMood = document.getElementById('form-mood');
+      const formRating = document.getElementById('form-rating');
+      const formDate = document.getElementById('form-date');
+      const formCreator = document.getElementById('form-creator');
+      const formNotes = document.getElementById('form-notes');
+      const formFavorite = document.getElementById('form-favorite');
+      const formCollectionsList = document.getElementById('form-collections-list');
+      const btnNewEntry = document.getElementById('btn-new-entry');
+      const btnCloseModal = document.getElementById('modal-close-btn');
+      const btnCancelModal = document.getElementById('btn-cancel-modal');
+
+      // Collection Modal Elements
+      const collectionModal = document.getElementById('collection-modal');
+      const collectionModalTitle = document.getElementById('collection-modal-title');
+      const collectionForm = document.getElementById('collection-form');
+      const collectionId = document.getElementById('collection-id');
+      const collectionName = document.getElementById('collection-name');
+      const collectionDescription = document.getElementById('collection-description');
+      const btnNewCollection = document.getElementById('btn-new-collection');
+      const btnCloseColModal = document.getElementById('collection-modal-close-btn');
+      const btnCancelColModal = document.getElementById('btn-cancel-collection-modal');
+
+      // Item Collections Modal Elements
+      const itemColsModal = document.getElementById('item-collections-modal');
+      const itemColsForm = document.getElementById('item-collections-form');
+      const targetItemId = document.getElementById('target-item-id');
+      const targetItemInfo = document.getElementById('target-item-info');
+      const itemColsChecklist = document.getElementById('item-collections-checklist');
+      const btnCloseItemCols = document.getElementById('item-collections-close-btn');
+      const btnCancelItemCols = document.getElementById('btn-cancel-item-collections');
+
+      // Quick Action Buttons
+      const btnSampleData = document.getElementById('btn-sample-data');
+      const btnExport = document.getElementById('btn-export-json');
+      const btnImport = document.getElementById('btn-import-json');
+      const fileImportInput = document.getElementById('file-import-input');
+
+      // --- RENDER FUNCTIONS ---
+      function updateStats() {
+        const stats = Journal.getStats();
+        statTotal.textContent = stats.total;
+        statHistory.textContent = stats.experiencedCount;
+        statWishlist.textContent = stats.wishlistCount;
+        statCollections.textContent = stats.collectionsCount || 0;
+        statTopMood.textContent = stats.topMood || 'None yet';
+        statAvgRating.textContent = stats.averageRating ? `${stats.averageRating} ★` : '—';
+        statMediaBreakdown.textContent = `${stats.byMediaType.movie} movies • ${stats.byMediaType.tv} tv • ${stats.byMediaType.music} music • ${stats.byMediaType.game} games`;
+      }
+
+      function updateCollectionFilterDropdown() {
+        const currentVal = filterCollection.value;
+        const collections = Journal.getAllCollections();
+        filterCollection.innerHTML = '<option value="all">All Collections</option>';
+        collections.forEach((col) => {
+          const opt = document.createElement('option');
+          opt.value = col.id;
+          opt.textContent = `📁 ${col.name} (${col.itemIds.length})`;
+          filterCollection.appendChild(opt);
+        });
+        if (collections.some((c) => c.id === currentVal)) {
+          filterCollection.value = currentVal;
+        } else {
+          filterCollection.value = 'all';
+        }
+      }
+
+      function renderEntries() {
+        updateCollectionFilterDropdown();
+
+        if (currentFilterStatus === 'collections') {
+          controlsSection.style.display = 'none';
+          if (activeCollectionId) {
+            renderCollectionDetail(activeCollectionId);
+          } else {
+            renderCollectionsList();
+          }
+          return;
+        }
+
+        controlsSection.style.display = 'block';
+
+        const [sortBy, sortOrder] = filterSort.value.split(':');
+        const criteria = {
+          query: searchInput.value,
+          mediaType: filterMedia.value,
+          mood: filterMood.value,
+          sortBy,
+          sortOrder
+        };
+
+        if (currentFilterStatus === 'favorites') {
+          criteria.isFavorite = true;
+        } else if (currentFilterStatus !== 'all') {
+          criteria.status = currentFilterStatus;
+        }
+
+        let entries = Journal.filterEntries(criteria);
+
+        // Filter by selected collection if specified
+        if (filterCollection.value !== 'all') {
+          const selectedCol = Journal.getCollection(filterCollection.value);
+          if (selectedCol) {
+            entries = entries.filter((item) => selectedCol.itemIds.includes(item.id));
+          }
+        }
+
+        grid.innerHTML = '';
+
+        if (entries.length === 0) {
+          grid.innerHTML = `
+            <div class="empty-state">
+              <h3>No journal entries found</h3>
+              <p>Try adjusting your search filters or click "+ Add New Entry" to log a memory!</p>
+            </div>
+          `;
+          return;
+        }
+
+        renderCardsIntoGrid(entries, false);
+      }
+
+      function renderCardsIntoGrid(entries, isInCollectionDetail = false) {
+        grid.innerHTML = '';
+        entries.forEach((item) => {
+          const card = document.createElement('article');
+          card.className = 'journal-card';
+
+          const creatorText = item.metadata && item.metadata.creator ? item.metadata.creator : '';
+          const moodBadge = item.mood ? `<span class="mood-badge">${item.mood}</span>` : '';
+          const stars = item.rating
+            ? `<span class="rating-stars">${'★'.repeat(Math.floor(item.rating))}${item.rating % 1 !== 0 ? '½' : ''} (${item.rating})</span>`
+            : '';
+          const notesBlock = item.notes ? `<div class="card-notes">“${escapeHtml(item.notes)}”</div>` : '';
+          const dateLabel = item.dateExperienced ? `Experienced: ${item.dateExperienced}` : 'Saved to Wishlist';
+
+          // Collections chips
+          const itemCols = Journal.getCollectionsForItem(item.id);
+          const colsHtml = itemCols.length > 0
+            ? `<div class="card-collections">${itemCols.map((c) => `<span class="collection-chip">📁 ${escapeHtml(c.name)}</span>`).join('')}</div>`
+            : '';
+
+          const collectionActionBtn = isInCollectionDetail
+            ? `<button class="card-action-btn delete" data-action="remove-from-active-collection" data-id="${item.id}" title="Remove from this collection">⨉ Remove</button>`
+            : `<button class="card-action-btn" data-action="manage-item-collections" data-id="${item.id}">📁 Collection</button>`;
+
+          card.innerHTML = `
+            <div class="card-top">
+              <span class="media-tag ${item.mediaType}">${item.mediaType}</span>
+              <button class="fav-btn ${item.isFavorite ? 'is-fav' : ''}" data-id="${item.id}" title="Toggle Favorite">
+                ${item.isFavorite ? '❤️' : '🤍'}
+              </button>
+            </div>
+            <h3 class="card-title">${escapeHtml(item.title)}</h3>
+            ${creatorText ? `<div class="card-creator">${escapeHtml(creatorText)}</div>` : ''}
+            <div class="card-mood-rating">
+              ${moodBadge}
+              ${stars}
+            </div>
+            ${colsHtml}
+            ${notesBlock}
+            <div class="card-footer">
+              <span>${dateLabel}</span>
+              <div class="card-actions">
+                <button class="card-action-btn" data-action="toggle-status" data-id="${item.id}">
+                  ${item.status === 'wishlist' ? '✓ Mark Done' : '⮌ Wishlist'}
+                </button>
+                ${collectionActionBtn}
+                <button class="card-action-btn" data-action="edit" data-id="${item.id}">Edit</button>
+                <button class="card-action-btn delete" data-action="delete" data-id="${item.id}">Delete</button>
+              </div>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+      }
+
+      function renderCollectionsList() {
+        const collections = Journal.getAllCollections();
+        grid.innerHTML = '';
+
+        const header = document.createElement('div');
+        header.className = 'collections-header-bar';
+        header.style.gridColumn = '1 / -1';
+        header.innerHTML = `
+          <div class="collections-header-info">
+            <h2>📁 Custom Collections (${collections.length})</h2>
+            <p>Curate themed scrapbooks across Movies, TV Shows, Music, and Games.</p>
+          </div>
+          <div class="collections-header-actions">
+            <button class="btn btn-primary" id="btn-create-col-inline">+ Create Collection</button>
+          </div>
+        `;
+        grid.appendChild(header);
+
+        document.getElementById('btn-create-col-inline').addEventListener('click', () => openCollectionModal());
+
+        if (collections.length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'empty-state';
+          empty.innerHTML = `
+            <h3>No Custom Collections Yet</h3>
+            <p>Create custom themed collections (e.g. "Spooky Night Marathon", "Chill Beats", "Favorite Sci-Fi") to organize your entertainment!</p>
+          `;
+          grid.appendChild(empty);
+          return;
+        }
+
+        collections.forEach((col) => {
+          const colItems = Journal.getCollectionItems(col.id);
+          const mediaCounts = { movie: 0, tv: 0, music: 0, game: 0 };
+          colItems.forEach((i) => {
+            if (mediaCounts[i.mediaType] !== undefined) mediaCounts[i.mediaType]++;
+          });
+
+          const breakdown = [];
+          if (mediaCounts.movie) breakdown.push(`${mediaCounts.movie} movie${mediaCounts.movie > 1 ? 's' : ''}`);
+          if (mediaCounts.tv) breakdown.push(`${mediaCounts.tv} TV`);
+          if (mediaCounts.music) breakdown.push(`${mediaCounts.music} music`);
+          if (mediaCounts.game) breakdown.push(`${mediaCounts.game} game${mediaCounts.game > 1 ? 's' : ''}`);
+          const breakdownText = breakdown.length > 0 ? breakdown.join(' • ') : 'Empty collection';
+
+          const card = document.createElement('article');
+          card.className = 'collection-card';
+          card.innerHTML = `
+            <div>
+              <div class="collection-card-top">
+                <span class="media-tag" style="background: rgba(139, 92, 246, 0.2); color: #c4b5fd;">COLLECTION</span>
+                <span class="collection-count-badge">${col.itemIds.length} item${col.itemIds.length === 1 ? '' : 's'}</span>
+              </div>
+              <h3 class="collection-card-title">${escapeHtml(col.name)}</h3>
+              <p class="collection-card-desc">${escapeHtml(col.description || 'No description provided.')}</p>
+              <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">${breakdownText}</div>
+            </div>
+            <div class="collection-card-footer">
+              <button class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;" data-action="open-collection" data-col-id="${col.id}">📂 Open Collection</button>
+              <div class="collection-card-actions">
+                <button class="card-action-btn" data-action="rename-collection" data-col-id="${col.id}">Rename</button>
+                <button class="card-action-btn delete" data-action="delete-collection" data-col-id="${col.id}">Delete</button>
+              </div>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+      }
+
+      function renderCollectionDetail(colId) {
+        const col = Journal.getCollection(colId);
+        if (!col) {
+          activeCollectionId = null;
+          renderCollectionsList();
+          return;
+        }
+
+        const items = Journal.getCollectionItems(colId);
+        grid.innerHTML = '';
+
+        const header = document.createElement('div');
+        header.className = 'collections-header-bar';
+        header.style.gridColumn = '1 / -1';
+        header.innerHTML = `
+          <div class="collections-header-info">
+            <h2>
+              <button class="btn btn-ghost" id="btn-back-collections" style="padding: 4px 10px; font-size: 0.85rem;">← Back</button>
+              <span>📁 ${escapeHtml(col.name)}</span>
+              <span class="collection-count-badge">${items.length} item${items.length === 1 ? '' : 's'}</span>
+            </h2>
+            <p>${escapeHtml(col.description || 'Custom collection')}</p>
+          </div>
+          <div class="collections-header-actions">
+            <button class="btn btn-secondary" id="btn-rename-active-col">✏️ Rename</button>
+            <button class="btn btn-secondary delete" id="btn-delete-active-col">🗑️ Delete</button>
+          </div>
+        `;
+        grid.appendChild(header);
+
+        document.getElementById('btn-back-collections').addEventListener('click', () => {
+          activeCollectionId = null;
+          renderCollectionsList();
+        });
+
+        document.getElementById('btn-rename-active-col').addEventListener('click', () => {
+          openCollectionModal(col);
+        });
+
+        document.getElementById('btn-delete-active-col').addEventListener('click', async () => {
+          if (confirm(`Delete the collection "${col.name}"? (Entries in your journal will remain intact)`)) {
+            await Journal.deleteCollection(col.id);
+            activeCollectionId = null;
+            renderCollectionsList();
+          }
+        });
+
+        if (items.length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'empty-state';
+          empty.innerHTML = `
+            <h3>This collection has no items yet</h3>
+            <p>Browse your entries in "All Items", "History", or "Explore Later" and click "📁 Collection" on any card to add items here!</p>
+          `;
+          grid.appendChild(empty);
+          return;
+        }
+
+        renderCardsIntoGrid(items, true);
+      }
+
+      function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>"']/g, function (m) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+        });
+      }
+
+      // --- ENTRY MODAL CONTROLS ---
+      function openModal(entryToEdit = null) {
+        entryForm.reset();
+        const allCollections = Journal.getAllCollections();
+        formCollectionsList.innerHTML = '';
+
+        if (allCollections.length === 0) {
+          formCollectionsList.innerHTML = '<span style="color: var(--text-muted); font-size: 0.85rem;">No collections created yet.</span>';
+        } else {
+          const assignedColIds = entryToEdit ? Journal.getCollectionsForItem(entryToEdit.id).map((c) => c.id) : [];
+          allCollections.forEach((col) => {
+            const label = document.createElement('label');
+            label.className = 'checkbox-item';
+            const isChecked = assignedColIds.includes(col.id) ? 'checked' : '';
+            label.innerHTML = `
+              <input type="checkbox" name="entry-collections" value="${col.id}" ${isChecked} />
+              <span>📁 ${escapeHtml(col.name)}</span>
+            `;
+            formCollectionsList.appendChild(label);
+          });
+        }
+
+        if (entryToEdit) {
+          modalTitle.textContent = 'Edit Journal Entry';
+          entryId.value = entryToEdit.id;
+          formTitle.value = entryToEdit.title;
+          formMediaType.value = entryToEdit.mediaType;
+          formStatus.value = entryToEdit.status;
+          formMood.value = entryToEdit.mood || '';
+          formRating.value = entryToEdit.rating || '';
+          formDate.value = entryToEdit.dateExperienced || '';
+          formCreator.value = (entryToEdit.metadata && entryToEdit.metadata.creator) || '';
+          formNotes.value = entryToEdit.notes || '';
+          formFavorite.checked = Boolean(entryToEdit.isFavorite);
+        } else {
+          modalTitle.textContent = 'Record New Memory';
+          entryId.value = '';
+          formDate.value = new Date().toISOString().split('T')[0];
+          formStatus.value = 'experienced';
+        }
+        modal.classList.add('open');
+      }
+
+      function closeModal() {
+        modal.classList.remove('open');
+      }
+
+      // --- COLLECTION MODAL CONTROLS ---
+      function openCollectionModal(colToEdit = null) {
+        collectionForm.reset();
+        if (colToEdit) {
+          collectionModalTitle.textContent = 'Rename Collection';
+          collectionId.value = colToEdit.id;
+          collectionName.value = colToEdit.name;
+          collectionDescription.value = colToEdit.description || '';
+        } else {
+          collectionModalTitle.textContent = 'Create New Collection';
+          collectionId.value = '';
+        }
+        collectionModal.classList.add('open');
+      }
+
+      function closeCollectionModal() {
+        collectionModal.classList.remove('open');
+      }
+
+      // --- ITEM COLLECTIONS MODAL CONTROLS ---
+      function openItemCollectionsModal(itemId) {
+        const item = Journal.getEntry(itemId);
+        if (!item) return;
+
+        targetItemId.value = item.id;
+        targetItemInfo.textContent = `Assign "${item.title}" (${item.mediaType}) to your collections:`;
+
+        const allCols = Journal.getAllCollections();
+        const itemCols = Journal.getCollectionsForItem(item.id).map((c) => c.id);
+        itemColsChecklist.innerHTML = '';
+
+        if (allCols.length === 0) {
+          itemColsChecklist.innerHTML = `
+            <div style="color: var(--text-muted); font-size: 0.85rem;">
+              No collections found. Click below to create your first collection!
+            </div>
+          `;
+        } else {
+          allCols.forEach((col) => {
+            const isChecked = itemCols.includes(col.id);
+            const label = document.createElement('label');
+            label.className = 'checkbox-item';
+            label.innerHTML = `
+              <input type="checkbox" name="item-col" value="${col.id}" ${isChecked ? 'checked' : ''} />
+              <span>📁 ${escapeHtml(col.name)} (${col.itemIds.length} items)</span>
+            `;
+            itemColsChecklist.appendChild(label);
+          });
+        }
+
+        itemColsModal.classList.add('open');
+      }
+
+      function closeItemCollectionsModal() {
+        itemColsModal.classList.remove('open');
+      }
+
+      // --- EVENT HANDLERS ---
+      entryForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = entryForm.querySelector('[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving…';
+
+        const data = {
+          title: formTitle.value,
+          mediaType: formMediaType.value,
+          status: formStatus.value,
+          mood: formMood.value || null,
+          rating: formRating.value ? Number(formRating.value) : null,
+          dateExperienced: formDate.value || null,
+          notes: formNotes.value,
+          isFavorite: formFavorite.checked,
+          metadata: {
+            creator: formCreator.value.trim()
+          }
+        };
+
+        let savedEntry;
+        try {
+          if (entryId.value) {
+            savedEntry = await Journal.updateEntry(entryId.value, data);
+          } else {
+            savedEntry = await Journal.createEntry(data);
+          }
+
+          // Save collection assignments after entry is persisted
+          const selectedColBoxes = formCollectionsList.querySelectorAll('input[name="entry-collections"]:checked');
+          const selectedColIds = Array.from(selectedColBoxes).map((b) => b.value);
+          await Journal.setCollectionsForItem(savedEntry.id, selectedColIds);
+
+          closeModal();
+        } catch (err) {
+          alert('Could not save entry: ' + err.message);
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Save Entry';
+        }
+      });
+
+      collectionForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = collectionForm.querySelector('[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving…';
+
+        const nameVal = collectionName.value.trim();
+        const descVal = collectionDescription.value.trim();
+
+        try {
+          if (collectionId.value) {
+            await Journal.updateCollection(collectionId.value, { name: nameVal, description: descVal });
+          } else {
+            await Journal.createCollection({ name: nameVal, description: descVal });
+          }
+          closeCollectionModal();
+        } catch (err) {
+          alert('Error: ' + err.message);
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Save Collection';
+        }
+      });
+
+      itemColsForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = targetItemId.value;
+        const checkedBoxes = itemColsChecklist.querySelectorAll('input[name="item-col"]:checked');
+        const targetIds = Array.from(checkedBoxes).map((cb) => cb.value);
+
+        try {
+          await Journal.setCollectionsForItem(id, targetIds);
+          closeItemCollectionsModal();
+        } catch (err) {
+          alert('Error updating collections: ' + err.message);
+        }
+      });
+
+      // Card action delegation
+      grid.addEventListener('click', async (e) => {
+        const favBtn = e.target.closest('.fav-btn');
+        if (favBtn) {
+          const id = favBtn.dataset.id;
+          try {
+            await Journal.toggleFavorite(id);
+          } catch (err) {
+            alert('Error updating favorite: ' + err.message);
+          }
+          return;
+        }
+
+        const actionBtn = e.target.closest('[data-action]');
+        if (!actionBtn) return;
+
+        const id = actionBtn.dataset.id;
+        const colId = actionBtn.dataset.colId;
+        const action = actionBtn.dataset.action;
+
+        try {
+          if (action === 'delete') {
+            if (confirm('Delete this journal entry?')) {
+              await Journal.deleteEntry(id);
+            }
+          } else if (action === 'edit') {
+            const item = Journal.getEntry(id);
+            if (item) openModal(item);
+          } else if (action === 'toggle-status') {
+            await Journal.toggleStatus(id);
+          } else if (action === 'manage-item-collections') {
+            openItemCollectionsModal(id);
+          } else if (action === 'open-collection') {
+            activeCollectionId = colId;
+            renderCollectionDetail(colId);
+          } else if (action === 'rename-collection') {
+            const col = Journal.getCollection(colId);
+            if (col) openCollectionModal(col);
+          } else if (action === 'delete-collection') {
+            const col = Journal.getCollection(colId);
+            if (col && confirm(`Delete collection "${col.name}"? (Entries in your journal will remain intact)`)) {
+              await Journal.deleteCollection(colId);
+            }
+          } else if (action === 'remove-from-active-collection') {
+            if (activeCollectionId && id) {
+              await Journal.removeItemFromCollection(activeCollectionId, id);
+            }
+          }
+        } catch (err) {
+          alert('Action error: ' + err.message);
+        }
+      });
+
+      // Search and Filter Listeners
+      searchInput.addEventListener('input', renderEntries);
+      filterMedia.addEventListener('change', renderEntries);
+      filterMood.addEventListener('change', renderEntries);
+      filterCollection.addEventListener('change', renderEntries);
+      filterSort.addEventListener('change', renderEntries);
+
+      // Tabs
+      tabButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          tabButtons.forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentFilterStatus = btn.dataset.status;
+          activeCollectionId = null;
+          renderEntries();
+        });
+      });
+
+      // Modal open/close bindings
+      btnNewEntry.addEventListener('click', () => openModal());
+      btnNewCollection.addEventListener('click', () => openCollectionModal());
+
+      btnCloseModal.addEventListener('click', closeModal);
+      btnCancelModal.addEventListener('click', closeModal);
+
+      btnCloseColModal.addEventListener('click', closeCollectionModal);
+      btnCancelColModal.addEventListener('click', closeCollectionModal);
+
+      btnCloseItemCols.addEventListener('click', closeItemCollectionsModal);
+      btnCancelItemCols.addEventListener('click', closeItemCollectionsModal);
+
+      window.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+        if (e.target === collectionModal) closeCollectionModal();
+        if (e.target === itemColsModal) closeItemCollectionsModal();
+      });
+
+      // Quick Actions: Sample data, Export, Import
+      btnSampleData.addEventListener('click', async () => {
+        try {
+          await Journal.loadSampleData();
+        } catch (err) {
+          alert('Error loading sample data: ' + err.message);
+        }
+      });
+
+      btnExport.addEventListener('click', () => {
+        const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(Journal.exportToJSON());
+        const dlAnchor = document.createElement('a');
+        dlAnchor.setAttribute('href', dataStr);
+        dlAnchor.setAttribute('download', 'state_of_mind_journal.json');
+        dlAnchor.click();
+      });
+
+      btnImport.addEventListener('click', () => {
+        fileImportInput.click();
+      });
+
+      fileImportInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const res = Journal.importFromJSON(event.target.result, { merge: true });
+          if (res.success) {
+            alert(`Successfully imported ${res.imported} entries and ${res.importedCollections || 0} collections!`);
+          } else {
+            alert('Import error: ' + res.errors.join('\n'));
+          }
+          fileImportInput.value = '';
+        };
+        reader.readAsText(file);
+      });
+
+      // Subscribe to Journal updates for automatic reactivity
+      Journal.subscribe(() => {
+        updateStats();
+        renderEntries();
+      });
+
+      // Initial render
+      updateStats();
+      renderEntries();
+    })();
+  </script>
+</body>
+</html>

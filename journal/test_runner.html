@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>State of Mind Journal — Automated Unit Tests</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #111827;
+      color: #f3f4f6;
+      padding: 24px;
+      line-height: 1.6;
+    }
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+      color: #a78bfa;
+    }
+    .summary {
+      margin-bottom: 20px;
+      padding: 12px;
+      background: #1f2937;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+    .test-pass {
+      color: #34d399;
+    }
+    .test-fail {
+      color: #f87171;
+    }
+    .suite-title {
+      font-size: 1.1rem;
+      margin-top: 16px;
+      color: #60a5fa;
+      border-bottom: 1px solid #374151;
+      padding-bottom: 4px;
+    }
+    .test-item {
+      padding: 4px 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>State of Mind Journal — Automated Test Suite</h1>
+  <div id="summary" class="summary">Running tests...</div>
+  <div id="results"></div>
+
+  <script src="journal.js"></script>
+  <script>
+    (async function () {
+      const resultsDiv = document.getElementById('results');
+      const summaryDiv = document.getElementById('summary');
+
+      let passed = 0;
+      let failed = 0;
+
+      function assert(condition, message) {
+        const item = document.createElement('div');
+        item.className = 'test-item';
+        if (condition) {
+          passed++;
+          item.innerHTML = `<span class="test-pass">✓ PASS:</span> ${message}`;
+        } else {
+          failed++;
+          item.innerHTML = `<span class="test-fail">✗ FAIL:</span> ${message}`;
+        }
+        resultsDiv.appendChild(item);
+      }
+
+      function section(name) {
+        const sec = document.createElement('div');
+        sec.className = 'suite-title';
+        sec.textContent = 'Suite: ' + name;
+        resultsDiv.appendChild(sec);
+      }
+
+      try {
+        // Configure for standalone test run without network interference
+        if (typeof Journal.configure === 'function') {
+          Journal.configure({ syncEnabled: false });
+        }
+
+        // Reset storage for clean test run
+        if (typeof localStorage !== 'undefined') {
+          localStorage.removeItem('state_of_mind_journal_entries');
+          localStorage.removeItem('state_of_mind_journal_collections');
+        }
+        await Journal.init();
+        Journal.clearAll();
+
+        section('1. Core Initialization & Empty State');
+        assert(Journal.getAllEntries().length === 0, 'Initial journal is empty after clearAll');
+        const emptyStats = Journal.getStats();
+        assert(emptyStats.total === 0, 'Stats total is 0');
+        assert(emptyStats.averageRating === null, 'Average rating is null when no ratings exist');
+
+        section('2. Recording Movies, Shows, Music, and Games');
+        const movie = await Journal.createEntry({
+          title: 'Interstellar',
+          mediaType: Journal.MEDIA_TYPES.MOVIE,
+          mood: 'Calm/Serene',
+          rating: 5,
+          notes: 'Epic visuals and soundtrack',
+          status: Journal.STATUS.EXPERIENCED,
+          isFavorite: true
+        });
+        assert(movie.id && movie.id.startsWith('jnl_'), 'Movie created with unique jnl_ id');
+        assert(movie.title === 'Interstellar', 'Movie title saved correctly');
+        assert(movie.mediaType === 'movie', 'Media type is movie');
+        assert(movie.isFavorite === true, 'Favorite flag is true');
+
+        const show = await Journal.createEntry({
+          title: 'Breaking Bad',
+          mediaType: Journal.MEDIA_TYPES.TV,
+          mood: 'Anger/Rage',
+          rating: 4.8,
+          status: Journal.STATUS.EXPERIENCED
+        });
+        assert(show.mediaType === 'tv', 'TV show recorded');
+
+        const music = await Journal.createEntry({
+          title: 'Discovery',
+          mediaType: Journal.MEDIA_TYPES.MUSIC,
+          mood: 'Happy/Excitement',
+          rating: 5,
+          status: Journal.STATUS.EXPERIENCED
+        });
+        assert(music.mediaType === 'music', 'Music recorded');
+
+        const game = await Journal.createEntry({
+          title: 'Elden Ring',
+          mediaType: Journal.MEDIA_TYPES.GAME,
+          mood: 'Confusion/Anxiety',
+          rating: 4.9,
+          status: Journal.STATUS.EXPERIENCED
+        });
+        assert(game.mediaType === 'game', 'Game recorded');
+        assert(Journal.getAllEntries().length === 4, 'All 4 media types logged in history');
+
+        section('3. Validation Rules');
+        let errorCaught = false;
+        try {
+          await Journal.createEntry({ title: '', mediaType: 'movie' });
+        } catch (e) {
+          errorCaught = true;
+        }
+        assert(errorCaught, 'Rejects empty title');
+
+        errorCaught = false;
+        try {
+          await Journal.createEntry({ title: 'Invalid Media', mediaType: 'book' });
+        } catch (e) {
+          errorCaught = true;
+        }
+        assert(errorCaught, 'Rejects invalid media type not in State of Mind');
+
+        errorCaught = false;
+        try {
+          await Journal.createEntry({ title: 'Invalid Rating', mediaType: 'game', rating: 12 });
+        } catch (e) {
+          errorCaught = true;
+        }
+        assert(errorCaught, 'Rejects rating outside 0 to 5 range');
+
+        section('4. Updating & Toggling Favorites');
+        const toggledMovie = await Journal.toggleFavorite(movie.id);
+        assert(toggledMovie.isFavorite === false, 'Toggled favorite from true to false');
+        await Journal.toggleFavorite(movie.id);
+        assert(Journal.getEntry(movie.id).isFavorite === true, 'Toggled favorite back to true');
+
+        const updatedShow = await Journal.updateEntry(show.id, { notes: 'Updated reflection note', rating: 5 });
+        assert(updatedShow.notes === 'Updated reflection note', 'Notes updated successfully');
+        assert(updatedShow.rating === 5, 'Rating updated to 5');
+
+        section('5. Explore Later (Wishlist) & Status Transitions');
+        const wishlistGame = await Journal.createEntry({
+          title: 'Zelda: Tears of the Kingdom',
+          mediaType: Journal.MEDIA_TYPES.GAME,
+          status: Journal.STATUS.WISHLIST
+        });
+        assert(wishlistGame.status === 'wishlist', 'Created entry with status wishlist');
+        assert(Journal.getWishlist().length === 1, 'Wishlist query returns 1 item');
+
+        await Journal.markAsExperienced(wishlistGame.id, {
+          rating: 4.8,
+          mood: 'Happy/Excitement',
+          notes: 'Completed all shrines!'
+        });
+        const completedGame = Journal.getEntry(wishlistGame.id);
+        assert(completedGame.status === 'experienced', 'Successfully transitioned from wishlist to experienced');
+        assert(completedGame.rating === 4.8, 'Rating set upon completion');
+        assert(Journal.getWishlist().length === 0, 'Wishlist now empty');
+
+        section('6. Search & Filters');
+        const searchResults = Journal.filterEntries({ query: 'Interstellar' });
+        assert(searchResults.length === 1 && searchResults[0].title === 'Interstellar', 'Query search matches title');
+
+        const notesSearch = Journal.filterEntries({ query: 'shrines' });
+        assert(notesSearch.length === 1 && notesSearch[0].title === 'Zelda: Tears of the Kingdom', 'Query search matches personal notes');
+
+        const moviesOnly = Journal.filterEntries({ mediaType: 'movie' });
+        assert(moviesOnly.length === 1 && moviesOnly[0].mediaType === 'movie', 'Filter by mediaType works');
+
+        const happyMoodOnly = Journal.filterEntries({ mood: 'Happy/Excitement' });
+        assert(happyMoodOnly.length === 2, 'Filter by mood matches multiple items');
+
+        const favsOnly = Journal.getFavorites();
+        assert(favsOnly.every((i) => i.isFavorite), 'Favorites filter only returns favorites');
+
+        section('7. Statistics & Analytics');
+        const stats = Journal.getStats();
+        assert(stats.total === 5, 'Stats total count is 5');
+        assert(stats.experiencedCount === 5, 'Experienced count is 5');
+        assert(stats.byMediaType.movie === 1, 'Movie count is 1');
+        assert(stats.byMediaType.game === 2, 'Game count is 2');
+        assert(typeof stats.averageRating === 'number' && stats.averageRating > 4, 'Calculated average rating is correct');
+
+        section('8. Export & Import JSON');
+        const exportedJson = Journal.exportToJSON();
+        assert(typeof exportedJson === 'string' && exportedJson.includes('Interstellar'), 'Exported valid JSON containing entries');
+
+        // Clear and re-import
+        Journal.clearAll();
+        assert(Journal.getAllEntries().length === 0, 'Cleared entries before import test');
+        const importRes = Journal.importFromJSON(exportedJson);
+        assert(importRes.success === true, 'Import succeeded');
+        assert(importRes.imported === 5, 'Imported all 5 entries');
+        assert(Journal.getAllEntries().length === 5, 'Entries restored from JSON import');
+
+        section('9. Delete Entry');
+        const deleted = await Journal.deleteEntry(movie.id);
+        assert(deleted === true, 'deleteEntry returned true');
+        assert(Journal.getEntry(movie.id) === null, 'Entry is deleted from journal');
+        assert(Journal.getAllEntries().length === 4, 'Total entries count decreased to 4');
+
+        section('10. Custom Collections');
+        // 10.1 Creation
+        const col1 = await Journal.createCollection({
+          name: 'Epic Adventures',
+          description: 'Action and journey stories'
+        });
+        assert(col1.id && col1.id.startsWith('col_'), 'Collection created with unique col_ id');
+        assert(col1.name === 'Epic Adventures', 'Collection name saved correctly');
+        assert(col1.description === 'Action and journey stories', 'Collection description saved');
+        assert(Array.isArray(col1.itemIds) && col1.itemIds.length === 0, 'New collection starts empty');
+
+        // 10.2 Validation
+        let colErrorCaught = false;
+        try {
+          await Journal.createCollection({ name: '' });
+        } catch (e) {
+          colErrorCaught = true;
+        }
+        assert(colErrorCaught, 'Rejects empty collection name');
+
+        colErrorCaught = false;
+        try {
+          await Journal.createCollection({ name: 'Epic Adventures' });
+        } catch (e) {
+          colErrorCaught = true;
+        }
+        assert(colErrorCaught, 'Rejects duplicate collection name');
+
+        // 10.3 Renaming
+        const renamed = await Journal.renameCollection(col1.id, 'Legendary Adventures');
+        assert(renamed.name === 'Legendary Adventures', 'Collection renamed successfully');
+        assert(Journal.getCollection(col1.id).name === 'Legendary Adventures', 'Renamed name persisted');
+
+        // 10.4 Add items across multiple media types
+        await Journal.addItemToCollection(col1.id, show.id); // TV
+        await Journal.addItemToCollection(col1.id, music.id); // Music
+        await Journal.addItemToCollection(col1.id, game.id); // Game
+        assert(Journal.getCollection(col1.id).itemIds.length === 3, 'Added TV, music, and game items to collection');
+
+        // 10.5 Duplicate membership prevention
+        await Journal.addItemToCollection(col1.id, show.id); // Try adding show again
+        assert(Journal.getCollection(col1.id).itemIds.length === 3, 'Duplicate item was not added to the same collection');
+
+        // 10.6 Item belonging to multiple collections
+        const col2 = await Journal.createCollection({ name: 'Chill Vibes' });
+        await Journal.addItemToCollection(col2.id, music.id);
+        assert(Journal.getCollection(col2.id).itemIds.includes(music.id), 'Music item added to second collection');
+        assert(Journal.getCollection(col1.id).itemIds.includes(music.id), 'Music item still in first collection');
+        const musicCols = Journal.getCollectionsForItem(music.id);
+        assert(musicCols.length === 2, 'getCollectionsForItem returns both collections');
+
+        // 10.7 Independence from Favorites, My List, and History
+        const wishlistMovie = await Journal.createEntry({
+          title: 'Dune: Part Two',
+          mediaType: Journal.MEDIA_TYPES.MOVIE,
+          status: Journal.STATUS.WISHLIST
+        });
+        await Journal.addItemToCollection(col1.id, wishlistMovie.id);
+        assert(Journal.getEntry(wishlistMovie.id).status === 'wishlist', 'Item in collection maintains wishlist status');
+        assert(Journal.getEntry(show.id).status === 'experienced', 'Item in collection maintains experienced status');
+        assert(Journal.getEntry(music.id).isFavorite === false, 'Item favorite flag remains intact and independent');
+
+        // 10.8 View collection contents
+        const col1Items = Journal.getCollectionItems(col1.id);
+        assert(col1Items.length === 4, 'getCollectionItems returns all 4 members');
+        assert(col1Items.some((i) => i.title === 'Breaking Bad') && col1Items.some((i) => i.title === 'Discovery'), 'Collection items contain correct member entries');
+
+        // 10.9 Remove item from collection
+        await Journal.removeItemFromCollection(col1.id, show.id);
+        assert(!Journal.getCollection(col1.id).itemIds.includes(show.id), 'Item removed from collection');
+        assert(Journal.getEntry(show.id) !== null, 'Underlying entry still exists in journal after removal from collection');
+
+        // 10.10 Delete collection without deleting underlying items
+        const colDeleted = await Journal.deleteCollection(col2.id);
+        assert(colDeleted === true, 'deleteCollection returned true');
+        assert(Journal.getCollection(col2.id) === null, 'Collection no longer exists');
+        assert(Journal.getEntry(music.id) !== null, 'Items inside deleted collection still exist in journal');
+
+        // 10.11 Deleting a journal entry automatically removes it from collections
+        await Journal.deleteEntry(game.id);
+        assert(!Journal.getCollection(col1.id).itemIds.includes(game.id), 'Deleted entry automatically removed from collection itemIds');
+
+        // 10.12 Export & Import JSON with collections
+        const exportBundle = Journal.exportToJSON();
+        Journal.clearAll();
+        assert(Journal.getAllCollections().length === 0, 'Collections cleared after clearAll');
+        const importBundleRes = Journal.importFromJSON(exportBundle);
+        assert(importBundleRes.success === true, 'Imported export bundle successfully');
+        assert(importBundleRes.importedCollections === 1, 'Restored 1 collection from JSON');
+        assert(Journal.getAllCollections().length === 1, 'Collection count restored');
+
+        // Finish summary
+        summaryDiv.innerHTML = `Tests completed: <span class="test-pass">${passed} Passed</span>, <span class="${failed ? 'test-fail' : 'test-pass'}">${failed} Failed</span>`;
+      } catch (err) {
+        failed++;
+        assert(false, 'Unhandled exception in test runner: ' + err.message);
+        summaryDiv.innerHTML = `Tests aborted with error: <span class="test-fail">${failed} Failed</span>`;
+      }
+    })();
+  </script>
+</body>
+</html>
