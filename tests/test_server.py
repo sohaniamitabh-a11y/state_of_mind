@@ -17,7 +17,8 @@ import json
 import sys
 import os
 
-# Add state_of_mind directory to sys.path so "from server import app" works.
+# Add repository root and state_of_mind directories to sys.path so "from server import app" works.
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "state_of_mind")))
 
 from server import app

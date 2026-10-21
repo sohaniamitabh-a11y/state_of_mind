@@ -1,6 +1,6 @@
 """
-state_of_mind/server.py
------------------------
+server.py
+---------
 Minimal Flask REST API for the State of Mind "My Journal" (Library)
 and Custom Collections feature.
 
@@ -176,7 +176,7 @@ def list_library():
         cursor = conn.cursor()
 
         query = """
-            SELECT 
+            SELECT
                 j.id, j.user_id, j.item_id, j.title, j.media_type,
                 j.mood_id, m.name AS mood_name, j.rating, j.date_experienced,
                 j.notes, j.is_favorite, j.status, j.metadata,
@@ -327,7 +327,7 @@ def get_library_entry(entry_id):
         cursor = conn.cursor()
         cursor.execute(
             """
-            SELECT 
+            SELECT
                 j.id, j.user_id, j.item_id, j.title, j.media_type,
                 j.mood_id, m.name AS mood_name, j.rating, j.date_experienced,
                 j.notes, j.is_favorite, j.status, j.metadata,
@@ -516,7 +516,7 @@ def toggle_status(entry_id):
         cursor = conn.cursor()
         cursor.execute(
             """
-            UPDATE user_journal 
+            UPDATE user_journal
             SET status = CASE WHEN status = 'wishlist' THEN 'experienced' ELSE 'wishlist' END,
                 date_experienced = CASE WHEN status = 'wishlist' AND date_experienced IS NULL THEN CURRENT_DATE ELSE date_experienced END
             WHERE id = %s AND user_id = %s

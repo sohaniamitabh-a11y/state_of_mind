@@ -1,4 +1,4 @@
-# Secrets — never commit these
+# Secrets — never commit these. Real values live only on your machine.
 .env
 config.properties
 
@@ -6,11 +6,17 @@ config.properties
 __pycache__/
 *.py[cod]
 *$py.class
-venv/
+*.pyc
 .venv/
+venv/
 
-# OS / editor junk
+# Java
+*.class
+
+# OS / editor junk & AI tooling
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+.cursor/
+.agents/

@@ -42,7 +42,6 @@ Data is persisted in MySQL via a Flask REST API and falls back to browser
 ## Project Structure
 
 ```
-state_of_mind/
 ├── server.py                  # Flask REST API (port 5001)
 ├── schema.sql                 # Core tables (moods, items, …)
 ├── journal_schema.sql         # Journal extension tables
@@ -74,13 +73,13 @@ CREATE DATABASE IF NOT EXISTS state_of_mind CHARACTER SET utf8mb4 COLLATE utf8mb
 ### 2. Apply core schema
 
 ```bash
-mysql -u root -p state_of_mind < state_of_mind/schema.sql
+mysql -u root -p state_of_mind < schema.sql
 ```
 
 ### 3. Apply journal extension schema
 
 ```bash
-mysql -u root -p state_of_mind < state_of_mind/journal_schema.sql
+mysql -u root -p state_of_mind < journal_schema.sql
 ```
 
 The journal schema creates three tables (idempotent — uses `CREATE TABLE IF NOT EXISTS`):
@@ -99,7 +98,7 @@ The journal schema creates three tables (idempotent — uses `CREATE TABLE IF NO
 
 ```bash
 # From the repository root
-./venv/bin/python state_of_mind/server.py
+python3 server.py
 ```
 
 The server starts on **http://127.0.0.1:5001** by default.
@@ -107,7 +106,7 @@ The server starts on **http://127.0.0.1:5001** by default.
 To use a different port:
 
 ```bash
-PORT=8080 ./venv/bin/python state_of_mind/server.py
+PORT=8080 python3 server.py
 ```
 
 ---
@@ -126,7 +125,7 @@ PORT=8080 ./venv/bin/python state_of_mind/server.py
 Example with overrides:
 
 ```bash
-DB_USER=myuser DB_PASSWORD=secret ./venv/bin/python state_of_mind/server.py
+DB_USER=myuser DB_PASSWORD=secret python3 server.py
 ```
 
 ---
@@ -248,10 +247,10 @@ Both the collection and the journal entry must belong to the requesting
 
 ```bash
 # Syntax check
-./venv/bin/python3 -m py_compile state_of_mind/server.py
+python3 -m py_compile server.py
 
 # Full test suite (51 tests, all mocked)
-./venv/bin/python3 -m unittest discover -s tests -v
+python3 -m unittest discover -s tests -v
 
 # Check for whitespace issues in tracked changes
 git diff --check
@@ -310,8 +309,8 @@ Stage only the new/modified files:
 ```bash
 git add journal/journal.js
 git add journal/JOURNAL_GUIDE.md
-git add state_of_mind/server.py
-git add state_of_mind/journal_schema.sql
+git add server.py
+git add journal_schema.sql
 git add tests/test_server.py
 # If you added any new journal UI files:
 git add journal/index.html journal/style.css journal/test_runner.html
