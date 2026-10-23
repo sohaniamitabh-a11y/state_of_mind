@@ -1430,124 +1430,7 @@ h1 em, h2 em {
   color: var(--muted);
 }
 
-/* Section 4: Team Section */
-.about-team-section {
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 60px 32px 80px;
-  border-top: 1px solid rgba(217, 185, 206, 0.18);
-}
-
-.team-header {
-  max-width: 900px;
-  margin-bottom: 44px;
-}
-
-.team-title {
-  font-family: 'Bebas Neue', 'Syne', sans-serif;
-  font-size: clamp(26px, 3.8vw, 44px);
-  line-height: 1.15;
-  letter-spacing: 0.04em;
-  color: #fff;
-  margin: 0;
-}
-
-.team-avatars-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  margin-bottom: 48px;
-}
-
-.team-member-card {
-  background: #110b14;
-  border: 1px solid rgba(217, 185, 206, 0.18);
-  border-radius: 4px;
-  padding: 24px 20px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  transition: transform 0.4s ease, border-color 0.4s ease;
-}
-
-.team-member-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(217, 185, 206, 0.45);
-}
-
-.member-avatar-box {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  border: 1px solid rgba(217, 185, 206, 0.35);
-  background: radial-gradient(circle at 35% 35%, #2a152e 0%, #110b14 75%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 6px;
-  box-shadow: 0 0 20px rgba(217, 185, 206, 0.15);
-}
-
-.member-sym {
-  font-size: 26px;
-  color: var(--accent-rose);
-}
-
-.member-name {
-  font-family: 'Syne', 'Manrope', sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  color: #fff;
-  margin: 0;
-}
-
-.member-role {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  color: var(--accent-rose);
-  text-transform: uppercase;
-}
-
-.member-desc {
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--muted);
-  margin: 4px 0 0;
-}
-
-/* Badges Bar */
-.stack-badges-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: center;
-  padding: 20px 0;
-  border-top: 1px solid rgba(217, 185, 206, 0.12);
-}
-
-.stack-badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(217, 185, 206, 0.06);
-  border: 1px solid rgba(217, 185, 206, 0.18);
-  border-radius: 999px;
-  padding: 6px 16px;
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.16em;
-  color: var(--cream);
-}
-
-.badge-idx {
-  color: var(--accent-rose);
-  font-weight: bold;
-}
-
-/* Section 5: Editorial Footer */
+/* Editorial Footer */
 .about-footer-block {
   width: 100%;
   background: #050306;
@@ -1633,9 +1516,6 @@ h1 em, h2 em {
   }
   .butterfly-video {
     max-height: 210px;
-  }
-  .team-avatars-row {
-    grid-template-columns: 1fr;
   }
   .footer-inner {
     flex-direction: column;
