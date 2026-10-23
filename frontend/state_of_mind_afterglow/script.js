@@ -306,6 +306,7 @@ document.querySelectorAll('.mood').forEach(button => {
     responseMood.textContent = displayName.toUpperCase();
 
     stage.classList.add('selected');
+    document.body.classList.add('modal-open');
     response.setAttribute('aria-hidden', 'false');
     moodArea.setAttribute('aria-hidden', 'true');
 
@@ -318,9 +319,103 @@ back.addEventListener('click', () => {
     activeAbortController.abort();
   }
   stage.classList.remove('selected');
+  document.body.classList.remove('modal-open');
   response.setAttribute('aria-hidden', 'true');
   moodArea.setAttribute('aria-hidden', 'false');
   if (recommendationsContainer) {
     recommendationsContainer.innerHTML = '';
   }
 });
+
+// ==========================================================================
+// SCROLL DETECTION, NAVIGATION & RISING TEXT INTERSECTION OBSERVER
+// ==========================================================================
+
+const aboutPage = document.getElementById('aboutPage');
+const scrollPrompt = document.getElementById('scrollPrompt');
+const scrollTopBtn = document.getElementById('scrollTopBtn');
+
+function scrollToAbout() {
+  if (aboutPage) {
+    aboutPage.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+function scrollToTop() {
+  if (stage) {
+    stage.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+if (scrollPrompt) {
+  scrollPrompt.addEventListener('click', scrollToAbout);
+  scrollPrompt.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      scrollToAbout();
+    }
+  });
+}
+
+if (scrollTopBtn) {
+  scrollTopBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    scrollToTop();
+  });
+}
+
+// User scrolls down on the stage before selecting a card -> smoothly scroll down to aboutPage
+let isScrollingToAbout = false;
+window.addEventListener('wheel', (e) => {
+  // Only trigger if we are at the top and not inside modal recommendations
+  if (stage.classList.contains('selected')) return;
+  if (window.scrollY < 80 && e.deltaY > 35 && !isScrollingToAbout) {
+    isScrollingToAbout = true;
+    scrollToAbout();
+    setTimeout(() => {
+      isScrollingToAbout = false;
+    }, 1200);
+  }
+}, { passive: true });
+
+// Mobile swipe up on stage to scroll to about page
+let touchStartY = null;
+window.addEventListener('touchstart', (e) => {
+  if (stage.classList.contains('selected')) return;
+  if (window.scrollY < 80 && e.touches.length > 0) {
+    touchStartY = e.touches[0].clientY;
+  }
+}, { passive: true });
+
+window.addEventListener('touchmove', (e) => {
+  if (touchStartY === null || stage.classList.contains('selected')) return;
+  const currentY = e.touches[0].clientY;
+  const diffY = touchStartY - currentY;
+  if (window.scrollY < 80 && diffY > 60 && !isScrollingToAbout) {
+    isScrollingToAbout = true;
+    touchStartY = null;
+    scrollToAbout();
+    setTimeout(() => {
+      isScrollingToAbout = false;
+    }, 1200);
+  }
+}, { passive: true });
+
+// Rising text & element animations on scroll (IntersectionObserver)
+const revealObserver = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('is-visible');
+      // Once revealed, keep it visible
+      observer.unobserve(entry.target);
+    }
+  });
+}, {
+  threshold: 0.12,
+  rootMargin: '0px 0px -40px 0px'
+});
+
+document.querySelectorAll('.reveal-on-scroll').forEach(el => {
+  revealObserver.observe(el);
+});
+

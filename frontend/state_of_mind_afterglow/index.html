@@ -6,7 +6,8 @@
 <meta name="theme-color" content="#050407">
 <title>State of Mind — Find your feeling</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Manrope:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -51,6 +52,10 @@
       </button>
     </div>
     <p class="footnote">YOUR MOOD IS A MOMENT, NOT YOUR WHOLE STORY.</p>
+    <div class="scroll-prompt" id="scrollPrompt" role="button" tabindex="0" aria-label="Scroll to learn about State of Mind">
+      <span class="scroll-prompt-text">OR SCROLL TO EXPLORE THE STORY</span>
+      <span class="scroll-prompt-arrow">↓</span>
+    </div>
   </section>
 
   <section class="response" id="response" aria-live="polite" aria-hidden="true">
@@ -67,6 +72,227 @@
   </section>
   <div class="bottom-note"><span>MADE FOR THE IN-BETWEEN</span><span>✳ &nbsp; STOP SCROLLING, START FEELING</span></div>
 </main>
+
+<!-- Editorial About Section (Unfolds on scroll) -->
+<article class="about-page" id="aboutPage" aria-label="About State of Mind">
+  <!-- Top Running Marquee Ribbon -->
+  <div class="editorial-ticker">
+    <div class="ticker-track">
+      <span>STATE OF MIND ✦ CROSS-MEDIA RECOMMENDATION ENGINE ✦ 脳は特定のデータに制限されるべきではない ✦ ZERO RUNTIME APIS ✦ THE BRAIN ✦ RELEVANCE FIRST ✦ AIVEN CLOUD ✦</span>
+      <span>STATE OF MIND ✦ CROSS-MEDIA RECOMMENDATION ENGINE ✦ 脳は特定のデータに制限されるべきではない ✦ ZERO RUNTIME APIS ✦ THE BRAIN ✦ RELEVANCE FIRST ✦ AIVEN CLOUD ✦</span>
+    </div>
+  </div>
+
+  <!-- Section 1: Hero Editorial Header -->
+  <header class="about-hero-wrap">
+    <div class="about-hero-meta reveal-on-scroll">
+      <span class="mono-badge">PAGE 02 // ARCHITECTURE</span>
+      <span class="mono-badge">ABOUT STATE OF MIND</span>
+      <span class="mono-badge">COLLEGE ENGINEERING PROJECT</span>
+    </div>
+
+    <h1 class="about-giant-title reveal-on-scroll delay-1">STATE OF MIND</h1>
+
+    <div class="about-ribbon reveal-on-scroll delay-2">
+      <span class="ribbon-item">THE BRAIN</span><i>✦</i>
+      <span class="ribbon-item">HARVESTERS</span><i>✦</i>
+      <span class="ribbon-item">CROSS-MEDIA</span><i>✦</i>
+      <span class="ribbon-item">AIVEN CLOUD</span><i>✦</i>
+      <span class="ribbon-item">RESONANCE</span>
+    </div>
+
+    <div class="about-hero-subline reveal-on-scroll delay-3">
+      <span class="kanji-accent">感情とメディアの共鳴</span>
+      <p class="subline-text">
+        A new kind of emotional intelligence engine. Tell us how you wanna feel, and we bring the best in the world for you across cinema, music, and interactive worlds.
+      </p>
+    </div>
+  </header>
+
+  <!-- Section 2: Narrative & Vertical "ABOUT US" Layout -->
+  <section class="about-narrative-section">
+    <div class="about-narrative-container">
+      <!-- Giant Rotated Vertical Heading Column -->
+      <div class="vertical-title-col reveal-on-scroll">
+        <div class="vertical-text-wrap">
+          <span class="vertical-title">ABOUT US</span>
+        </div>
+      </div>
+
+      <!-- Narrative & Feature Slots Column -->
+      <div class="narrative-content-col">
+        <div class="narrative-copy-block">
+          <p class="lead-quote reveal-on-scroll">
+            "A brain shall never be restricted to specific data."
+          </p>
+          <p class="story-para reveal-on-scroll delay-1">
+            State of Mind was created to solve a quiet fatigue: scrolling endlessly through algorithmic feeds designed to maximize screen time rather than honor how you actually feel. We replace opaque black-box recommendations with a transparent, weighted synaptic brain that maps human emotional headspaces directly to artistic genres.
+          </p>
+          <p class="story-para reveal-on-scroll delay-2">
+            No sign-up, no algorithmic bubble, and zero third-party API dependencies at query time. Everything runs off a cloud-cached MySQL brain, refreshed periodically by autonomous harvesters, so recommendations are instant, resilient, and deeply resonant.
+          </p>
+        </div>
+
+        <!-- Preserved Animation Canvas Slots (Reserved for future visual interactive animations) -->
+        <div class="anim-slots-grid reveal-on-scroll delay-3">
+          <div class="anim-slot-box" data-slot="01">
+            <div class="slot-badge-bar">
+              <span class="slot-number">SLOT 01</span>
+              <span class="slot-tag">ANIMATION CANVAS</span>
+            </div>
+            <div class="slot-visual-canvas">
+              <div class="canvas-glow"></div>
+              <div class="slot-placeholder-icon">🧠</div>
+              <div class="slot-wireframe-lines">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+            <div class="slot-meta">
+              <span class="slot-title">The Synaptic Mapping</span>
+              <span class="slot-desc">Mood-to-genre weighted relevance matrix connecting emotional vectors to media domains.</span>
+            </div>
+          </div>
+
+          <div class="anim-slot-box" data-slot="02">
+            <div class="slot-badge-bar">
+              <span class="slot-number">SLOT 02</span>
+              <span class="slot-tag">ANIMATION CANVAS</span>
+            </div>
+            <div class="slot-visual-canvas">
+              <div class="canvas-glow"></div>
+              <div class="slot-placeholder-icon">⚡</div>
+              <div class="slot-wireframe-lines">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+            <div class="slot-meta">
+              <span class="slot-title">Autonomous Harvester Pulse</span>
+              <span class="slot-desc">Midnight scheduled crawlers ingesting TMDB, Deezer charts, and RAWG game indexes.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3: Strategic Blueprint & Feature Blocks -->
+  <section class="about-blueprint-section">
+    <div class="blueprint-headline-wrap reveal-on-scroll">
+      <span class="mono-eyebrow">ARCHITECTURAL MANIFESTO</span>
+      <h2 class="manifesto-heading">
+        STATE OF MIND OPERATES ON A SIMPLE LAW: RELEVANCE FIRST, POPULARITY ONLY AS A TIEBREAKER — NEVER AVERAGED TOGETHER.
+      </h2>
+      <p class="manifesto-desc">
+        Because mood-fit is the entire soul of the application, a wildly popular title that poorly matches your current headspace must never outrank a deeply resonant hidden gem.
+      </p>
+    </div>
+
+    <!-- Preserved 4-Block Feature Canvas Grid -->
+    <div class="blueprint-blocks-grid">
+      <div class="blueprint-card reveal-on-scroll">
+        <div class="blueprint-card-slot">
+          <div class="blueprint-slot-label">SLOT 03 // VISUAL BLOCK</div>
+          <div class="blueprint-slot-icon">🎬</div>
+        </div>
+        <span class="blueprint-card-num">01</span>
+        <h3 class="blueprint-card-title">Movies & TV Series</h3>
+        <p class="blueprint-card-body">Ranked through TMDB trending scores joined with weighted cinematic mood categories.</p>
+      </div>
+
+      <div class="blueprint-card reveal-on-scroll delay-1">
+        <div class="blueprint-card-slot">
+          <div class="blueprint-slot-label">SLOT 04 // VISUAL BLOCK</div>
+          <div class="blueprint-slot-icon">🎵</div>
+        </div>
+        <span class="blueprint-card-num">02</span>
+        <h3 class="blueprint-card-title">Sonic Resonance</h3>
+        <p class="blueprint-card-body">Deezer chart tracks calibrated through genre aliasing and acoustic mood fallbacks.</p>
+      </div>
+
+      <div class="blueprint-card reveal-on-scroll delay-2">
+        <div class="blueprint-card-slot">
+          <div class="blueprint-slot-label">SLOT 05 // VISUAL BLOCK</div>
+          <div class="blueprint-slot-icon">🎮</div>
+        </div>
+        <span class="blueprint-card-num">03</span>
+        <h3 class="blueprint-card-title">Interactive Worlds</h3>
+        <p class="blueprint-card-body">Curated RAWG titles tuned to high-focus, meditative, or adrenaline-heavy emotional states.</p>
+      </div>
+
+      <div class="blueprint-card reveal-on-scroll delay-3">
+        <div class="blueprint-card-slot">
+          <div class="blueprint-slot-label">SLOT 06 // VISUAL BLOCK</div>
+          <div class="blueprint-slot-icon">☁</div>
+        </div>
+        <span class="blueprint-card-num">04</span>
+        <h3 class="blueprint-card-title">Cloud MySQL Brain</h3>
+        <p class="blueprint-card-body">Aiven MySQL cluster enforcing SSL connections, deduplication, and zero runtime cold starts.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: The 3-Person Team & Engineering Credits -->
+  <section class="about-team-section">
+    <div class="team-header reveal-on-scroll">
+      <span class="mono-eyebrow">THE ARCHITECTS</span>
+      <h2 class="team-title">
+        BUILT BY A 3-PERSON COLLEGE TEAM WITH DISCIPLINES DIVIDED ACROSS DATA HARVESTING, THE CORE ENGINE, AND MOTION UI.
+      </h2>
+    </div>
+
+    <div class="team-avatars-row reveal-on-scroll delay-1">
+      <div class="team-member-card">
+        <div class="member-avatar-box">
+          <span class="member-sym">✦</span>
+        </div>
+        <h4 class="member-name">Amitabh</h4>
+        <span class="member-role">Backend Engine & Database</span>
+        <p class="member-desc">Flask API orchestration, MySQL database design, query optimization, and Render deployment.</p>
+      </div>
+
+      <div class="team-member-card">
+        <div class="member-avatar-box">
+          <span class="member-sym">☼</span>
+        </div>
+        <h4 class="member-name">Sakshi</h4>
+        <span class="member-role">Frontend Design & Motion</span>
+        <p class="member-desc">Afterglow blooming video scene, color grading, responsive layout architecture, and UI polish.</p>
+      </div>
+
+      <div class="team-member-card">
+        <div class="member-avatar-box">
+          <span class="member-sym">❖</span>
+        </div>
+        <h4 class="member-name">Harvester Squad</h4>
+        <span class="member-role">Data Pipelines & Seed</span>
+        <p class="member-desc">Scheduled multi-device harvesters for TMDB, Deezer charts, and RAWG games catalog.</p>
+      </div>
+    </div>
+
+    <!-- Bottom Aesthetic Badge Bar (Matching Reference) -->
+    <div class="stack-badges-bar reveal-on-scroll delay-2">
+      <div class="stack-badge"><span class="badge-idx">01</span><span>FLASK 3.x</span></div>
+      <div class="stack-badge"><span class="badge-idx">02</span><span>AIVEN MYSQL</span></div>
+      <div class="stack-badge"><span class="badge-idx">03</span><span>GUNICORN</span></div>
+      <div class="stack-badge"><span class="badge-idx">04</span><span>VANILLA JS</span></div>
+      <div class="stack-badge"><span class="badge-idx">05</span><span>MOTION CSS</span></div>
+      <div class="stack-badge"><span class="badge-idx">06</span><span>ACCESSIBILITY</span></div>
+    </div>
+  </section>
+
+  <!-- Section 5: Editorial Footer & Back To Bloom -->
+  <footer class="about-footer-block reveal-on-scroll">
+    <div class="footer-inner">
+      <a href="#stage" class="scroll-top-btn" id="scrollTopBtn">
+        <span>↑</span> RETURN TO THE BLOOM
+      </a>
+      <div class="footer-meta-right">
+        <span>STATE OF MIND • 2026</span>
+        <span>MADE FOR THE IN-BETWEEN</span>
+      </div>
+    </div>
+  </footer>
+</article>
 <script src="script.js"></script>
 </body>
 </html>

@@ -21,7 +21,16 @@ html, body {
   font-family: Manrope, Arial, sans-serif;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body.modal-open {
   overflow: hidden;
 }
 
@@ -1016,5 +1025,732 @@ h1 em, h2 em {
   *, *:before, *:after {
     transition: none !important;
     scroll-behavior: auto !important;
+  }
+}
+
+
+/* ==========================================================================
+   SCROLL PROMPT (Hero Stage)
+   ========================================================================== */
+
+.scroll-prompt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin: 18px auto 0;
+  padding: 8px 20px;
+  border: 1px solid rgba(217, 185, 206, 0.22);
+  border-radius: 999px;
+  background: rgba(18, 12, 21, 0.65);
+  backdrop-filter: blur(10px);
+  color: var(--accent-rose);
+  font-family: 'DM Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.8s ease 0.4s, transform 0.8s ease 0.4s, background 0.3s ease, border-color 0.3s ease;
+  user-select: none;
+}
+
+.stage.ready .scroll-prompt {
+  opacity: 0.85;
+  transform: translateY(0);
+}
+
+.scroll-prompt:hover,
+.scroll-prompt:focus-visible {
+  opacity: 1;
+  background: rgba(38, 22, 42, 0.9);
+  border-color: rgba(217, 185, 206, 0.55);
+  box-shadow: 0 0 16px rgba(217, 185, 206, 0.2);
+}
+
+.scroll-prompt-arrow {
+  display: inline-block;
+  font-size: 11px;
+  animation: promptArrowNudge 2s ease-in-out infinite;
+}
+
+@keyframes promptArrowNudge {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+}
+
+/* ==========================================================================
+   REVEAL ON SCROLL (Rising text & element animation)
+   ========================================================================== */
+
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(48px);
+  filter: blur(3px);
+  transition: opacity 0.95s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.95s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.95s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity, filter;
+}
+
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+.reveal-on-scroll.delay-1 {
+  transition-delay: 0.14s;
+}
+
+.reveal-on-scroll.delay-2 {
+  transition-delay: 0.26s;
+}
+
+.reveal-on-scroll.delay-3 {
+  transition-delay: 0.38s;
+}
+
+/* ==========================================================================
+   EDITORIAL ABOUT PAGE (Azuki-inspired dark editorial theme)
+   ========================================================================== */
+
+.about-page {
+  position: relative;
+  width: 100%;
+  background: #08060a;
+  color: var(--cream);
+  border-top: 1px solid rgba(217, 185, 206, 0.2);
+  overflow-x: hidden;
+  box-shadow: 0 -30px 60px rgba(0, 0, 0, 0.85);
+}
+
+/* Running Marquee Ribbon */
+.editorial-ticker {
+  width: 100%;
+  overflow: hidden;
+  background: #140d18;
+  border-bottom: 1px solid rgba(217, 185, 206, 0.18);
+  padding: 10px 0;
+  white-space: nowrap;
+}
+
+.ticker-track {
+  display: inline-flex;
+  gap: 24px;
+  animation: tickerScroll 38s linear infinite;
+  will-change: transform;
+}
+
+.ticker-track span {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--accent-rose);
+  text-transform: uppercase;
+}
+
+@keyframes tickerScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* Hero Header */
+.about-hero-wrap {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 80px 32px 50px;
+  text-align: center;
+}
+
+.about-hero-meta {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.mono-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--accent-rose);
+  background: rgba(217, 185, 206, 0.08);
+  border: 1px solid rgba(217, 185, 206, 0.2);
+  padding: 5px 12px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+.about-giant-title {
+  font-family: 'Bebas Neue', 'Syne', sans-serif;
+  font-size: clamp(68px, 14vw, 170px);
+  line-height: 0.9;
+  letter-spacing: 0.04em;
+  margin: 12px 0 24px;
+  color: #fff;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, #ffffff 30%, #d9b9ce 95%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 10px 40px rgba(217, 185, 206, 0.15);
+}
+
+.about-ribbon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 20px 0 28px;
+  padding: 10px 18px;
+  border-top: 1px solid rgba(217, 185, 206, 0.15);
+  border-bottom: 1px solid rgba(217, 185, 206, 0.15);
+}
+
+.ribbon-item {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: var(--cream);
+  text-transform: uppercase;
+}
+
+.about-ribbon i {
+  color: var(--accent-rose);
+  font-style: normal;
+  font-size: 9px;
+}
+
+.about-hero-subline {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.kanji-accent {
+  display: block;
+  font-size: 13px;
+  letter-spacing: 0.35em;
+  color: var(--accent-rose);
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.subline-text {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--muted);
+  margin: 0;
+}
+
+/* Section 2: Narrative & Vertical "ABOUT US" Column */
+.about-narrative-section {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 50px 32px 80px;
+}
+
+.about-narrative-container {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 48px;
+  border-top: 1px solid rgba(217, 185, 206, 0.18);
+  padding-top: 60px;
+}
+
+.vertical-title-col {
+  display: flex;
+  justify-content: center;
+  border-right: 1px solid rgba(217, 185, 206, 0.18);
+  padding-right: 28px;
+}
+
+.vertical-text-wrap {
+  position: sticky;
+  top: 90px;
+  height: fit-content;
+}
+
+.vertical-title {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-family: 'Bebas Neue', 'Syne', sans-serif;
+  font-size: clamp(62px, 8vw, 112px);
+  line-height: 0.85;
+  letter-spacing: 0.08em;
+  color: var(--accent-rose);
+  opacity: 0.88;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.narrative-content-col {
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+}
+
+.lead-quote {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(24px, 3.2vw, 38px);
+  line-height: 1.35;
+  color: #fff;
+  font-style: italic;
+  margin: 0 0 24px;
+}
+
+.story-para {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #d1c8cf;
+  margin: 0 0 18px;
+  max-width: 820px;
+}
+
+/* Animation Canvas Slots (Preserved frames for future animations) */
+.anim-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.anim-slot-box {
+  position: relative;
+  background: #110b14;
+  border: 1px solid rgba(217, 185, 206, 0.22);
+  border-radius: 4px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: border-color 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.anim-slot-box:hover {
+  border-color: rgba(217, 185, 206, 0.5);
+  transform: translateY(-4px);
+  box-shadow: 0 14px 34px rgba(217, 185, 206, 0.1);
+}
+
+.slot-badge-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.slot-number {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--cream);
+  font-weight: 600;
+}
+
+.slot-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--accent-rose);
+  background: rgba(217, 185, 206, 0.1);
+  padding: 2px 7px;
+  border-radius: 2px;
+}
+
+.slot-visual-canvas {
+  position: relative;
+  height: 220px;
+  background: radial-gradient(circle at 50% 50%, #1e1322 0%, #0d0810 85%);
+  border: 1px dashed rgba(217, 185, 206, 0.25);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.canvas-glow {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(circle, rgba(217, 185, 206, 0.22) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: slotPulse 4s ease-in-out infinite;
+}
+
+@keyframes slotPulse {
+  0%, 100% { transform: scale(0.9); opacity: 0.5; }
+  50% { transform: scale(1.15); opacity: 0.9; }
+}
+
+.slot-placeholder-icon {
+  font-size: 42px;
+  z-index: 2;
+  filter: drop-shadow(0 0 12px rgba(217, 185, 206, 0.4));
+  transition: transform 0.4s ease;
+}
+
+.anim-slot-box:hover .slot-placeholder-icon {
+  transform: scale(1.12);
+}
+
+.slot-wireframe-lines {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.slot-wireframe-lines span {
+  width: 100%;
+  height: 1px;
+  background: var(--cream);
+}
+
+.slot-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.slot-title {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.slot-desc {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+/* Section 3: Strategic Blueprint Architecture */
+.about-blueprint-section {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 60px 32px 80px;
+  border-top: 1px solid rgba(217, 185, 206, 0.18);
+}
+
+.blueprint-header {
+  max-width: 860px;
+  margin-bottom: 44px;
+}
+
+.mono-eyebrow {
+  display: block;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: var(--accent-rose);
+  margin-bottom: 12px;
+}
+
+.blueprint-title {
+  font-family: 'Bebas Neue', 'Syne', sans-serif;
+  font-size: clamp(26px, 3.8vw, 44px);
+  line-height: 1.15;
+  letter-spacing: 0.04em;
+  color: #fff;
+  margin: 0;
+}
+
+.blueprint-blocks-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.blueprint-card {
+  position: relative;
+  background: #100a13;
+  border: 1px solid rgba(217, 185, 206, 0.18);
+  border-radius: 4px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.4s ease, border-color 0.4s ease;
+}
+
+.blueprint-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(217, 185, 206, 0.45);
+}
+
+.blueprint-card-slot {
+  height: 130px;
+  background: radial-gradient(circle at 50% 50%, #1a101f 0%, #0a060d 90%);
+  border: 1px dashed rgba(217, 185, 206, 0.22);
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.blueprint-slot-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  color: var(--accent-rose);
+  opacity: 0.8;
+}
+
+.blueprint-slot-icon {
+  font-size: 26px;
+  filter: drop-shadow(0 0 8px rgba(217, 185, 206, 0.3));
+}
+
+.blueprint-card-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  color: var(--accent-rose);
+  line-height: 1;
+}
+
+.blueprint-card-title {
+  font-family: 'Manrope', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.blueprint-card-body {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0;
+}
+
+/* Section 4: Team Section */
+.about-team-section {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 60px 32px 80px;
+  border-top: 1px solid rgba(217, 185, 206, 0.18);
+}
+
+.team-header {
+  max-width: 900px;
+  margin-bottom: 44px;
+}
+
+.team-title {
+  font-family: 'Bebas Neue', 'Syne', sans-serif;
+  font-size: clamp(26px, 3.8vw, 44px);
+  line-height: 1.15;
+  letter-spacing: 0.04em;
+  color: #fff;
+  margin: 0;
+}
+
+.team-avatars-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+.team-member-card {
+  background: #110b14;
+  border: 1px solid rgba(217, 185, 206, 0.18);
+  border-radius: 4px;
+  padding: 24px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  transition: transform 0.4s ease, border-color 0.4s ease;
+}
+
+.team-member-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(217, 185, 206, 0.45);
+}
+
+.member-avatar-box {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 1px solid rgba(217, 185, 206, 0.35);
+  background: radial-gradient(circle at 35% 35%, #2a152e 0%, #110b14 75%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+  box-shadow: 0 0 20px rgba(217, 185, 206, 0.15);
+}
+
+.member-sym {
+  font-size: 26px;
+  color: var(--accent-rose);
+}
+
+.member-name {
+  font-family: 'Syne', 'Manrope', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.member-role {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--accent-rose);
+  text-transform: uppercase;
+}
+
+.member-desc {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 4px 0 0;
+}
+
+/* Badges Bar */
+.stack-badges-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  padding: 20px 0;
+  border-top: 1px solid rgba(217, 185, 206, 0.12);
+}
+
+.stack-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(217, 185, 206, 0.06);
+  border: 1px solid rgba(217, 185, 206, 0.18);
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--cream);
+}
+
+.badge-idx {
+  color: var(--accent-rose);
+  font-weight: bold;
+}
+
+/* Section 5: Editorial Footer */
+.about-footer-block {
+  width: 100%;
+  background: #050306;
+  border-top: 1px solid rgba(217, 185, 206, 0.18);
+  padding: 34px 32px;
+}
+
+.footer-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.scroll-top-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--accent-rose);
+  text-decoration: none;
+  background: rgba(217, 185, 206, 0.08);
+  border: 1px solid rgba(217, 185, 206, 0.25);
+  padding: 10px 22px;
+  border-radius: 999px;
+  transition: all 0.3s ease;
+}
+
+.scroll-top-btn:hover {
+  background: rgba(217, 185, 206, 0.2);
+  border-color: rgba(217, 185, 206, 0.6);
+  transform: translateY(-2px);
+  color: #fff;
+}
+
+.footer-meta-right {
+  display: flex;
+  gap: 24px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (About Section)
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+  .blueprint-blocks-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .about-hero-wrap {
+    padding: 60px 20px 40px;
+  }
+  .about-narrative-container {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  .vertical-title-col {
+    border-right: none;
+    border-bottom: 1px solid rgba(217, 185, 206, 0.18);
+    padding-right: 0;
+    padding-bottom: 24px;
+    justify-content: flex-start;
+  }
+  .vertical-text-wrap {
+    position: static;
+  }
+  .vertical-title {
+    writing-mode: horizontal-tb;
+    transform: none;
+    font-size: 48px;
+    letter-spacing: 0.06em;
+  }
+  .anim-slots-grid {
+    grid-template-columns: 1fr;
+  }
+  .blueprint-blocks-grid {
+    grid-template-columns: 1fr;
+  }
+  .team-avatars-row {
+    grid-template-columns: 1fr;
+  }
+  .footer-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .footer-meta-right {
+    flex-direction: column;
+    gap: 8px;
   }
 }
