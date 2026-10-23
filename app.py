@@ -26,7 +26,10 @@ ALLOWED_MOODS = {
 
 @app.route("/")
 def home():
-    """Confirm that the backend server is running."""
+    """Confirm that the backend server is running, or serve frontend if opened in browser."""
+    if "text/html" in request.headers.get("Accept", ""):
+        frontend_dir = os.path.join(BASE_DIR, "frontend")
+        return send_from_directory(frontend_dir, "index.html")
     return {
         "message": "State of Mind backend is running"
     }
