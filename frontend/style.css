@@ -1310,39 +1310,35 @@ h1 em, h2 em {
   max-width: 820px;
 }
 
-/* Animation Canvas Slots (Preserved frames for future animations) */
-.anim-slots-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-  margin-top: 20px;
-}
-
-.anim-slot-box {
+/* Butterfly Motion Showcase (Spans the collective size of previous slot cards) */
+.butterfly-showcase-box {
   position: relative;
   background: #110b14;
   border: 1px solid rgba(217, 185, 206, 0.22);
   border-radius: 4px;
-  padding: 16px;
+  padding: 22px 24px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
+  margin-top: 24px;
+  width: 100%;
+  box-sizing: border-box;
   transition: border-color 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
 }
 
-.anim-slot-box:hover {
-  border-color: rgba(217, 185, 206, 0.5);
+.butterfly-showcase-box:hover {
+  border-color: rgba(217, 185, 206, 0.55);
   transform: translateY(-4px);
-  box-shadow: 0 14px 34px rgba(217, 185, 206, 0.1);
+  box-shadow: 0 16px 40px rgba(217, 185, 206, 0.12);
 }
 
-.slot-badge-bar {
+.butterfly-badge-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.slot-number {
+.butterfly-tag-left {
   font-family: 'DM Mono', monospace;
   font-size: 11px;
   letter-spacing: 0.16em;
@@ -1350,188 +1346,88 @@ h1 em, h2 em {
   font-weight: 600;
 }
 
-.slot-tag {
+.butterfly-tag-right {
   font-family: 'DM Mono', monospace;
   font-size: 9px;
   letter-spacing: 0.18em;
   color: var(--accent-rose);
   background: rgba(217, 185, 206, 0.1);
-  padding: 2px 7px;
+  padding: 3px 9px;
   border-radius: 2px;
 }
 
-.slot-visual-canvas {
+.butterfly-canvas {
   position: relative;
-  height: 220px;
-  background: radial-gradient(circle at 50% 50%, #1e1322 0%, #0d0810 85%);
+  width: 100%;
+  height: 340px;
+  background: radial-gradient(circle at 50% 50%, #1c1122 0%, #0d0811 88%);
   border: 1px dashed rgba(217, 185, 206, 0.25);
-  border-radius: 2px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
 }
 
-.canvas-glow {
+.butterfly-ambient-glow {
   position: absolute;
-  width: 140px;
-  height: 140px;
-  background: radial-gradient(circle, rgba(217, 185, 206, 0.22) 0%, transparent 70%);
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, rgba(217, 185, 206, 0.24) 0%, transparent 70%);
   border-radius: 50%;
-  animation: slotPulse 4s ease-in-out infinite;
+  animation: butterflyGlow 5s ease-in-out infinite;
+  pointer-events: none;
 }
 
-@keyframes slotPulse {
-  0%, 100% { transform: scale(0.9); opacity: 0.5; }
-  50% { transform: scale(1.15); opacity: 0.9; }
+@keyframes butterflyGlow {
+  0%, 100% { transform: scale(0.9); opacity: 0.55; }
+  50% { transform: scale(1.2); opacity: 0.95; }
 }
 
-.slot-placeholder-icon {
-  font-size: 42px;
+.butterfly-video {
+  max-width: 90%;
+  max-height: 290px;
+  object-fit: contain;
   z-index: 2;
-  filter: drop-shadow(0 0 12px rgba(217, 185, 206, 0.4));
-  transition: transform 0.4s ease;
+  filter: drop-shadow(0 0 24px rgba(217, 185, 206, 0.35));
+  mix-blend-mode: screen;
+  pointer-events: none;
 }
 
-.anim-slot-box:hover .slot-placeholder-icon {
-  transform: scale(1.12);
-}
-
-.slot-wireframe-lines {
+.butterfly-wireframe-lines {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
-  opacity: 0.12;
+  opacity: 0.08;
   pointer-events: none;
 }
 
-.slot-wireframe-lines span {
+.butterfly-wireframe-lines span {
   width: 100%;
   height: 1px;
   background: var(--cream);
 }
 
-.slot-meta {
+.butterfly-caption {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.slot-title {
-  font-family: 'Manrope', sans-serif;
+.butterfly-title {
+  font-family: 'Syne', 'Manrope', sans-serif;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 16px;
   color: #fff;
   letter-spacing: 0.02em;
 }
 
-.slot-desc {
-  font-size: 12px;
-  line-height: 1.55;
-  color: var(--muted);
-}
-
-/* Section 3: Strategic Blueprint Architecture */
-.about-blueprint-section {
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 60px 32px 80px;
-  border-top: 1px solid rgba(217, 185, 206, 0.18);
-}
-
-.blueprint-header {
-  max-width: 860px;
-  margin-bottom: 44px;
-}
-
-.mono-eyebrow {
-  display: block;
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.24em;
-  color: var(--accent-rose);
-  margin-bottom: 12px;
-}
-
-.blueprint-title {
-  font-family: 'Bebas Neue', 'Syne', sans-serif;
-  font-size: clamp(26px, 3.8vw, 44px);
-  line-height: 1.15;
-  letter-spacing: 0.04em;
-  color: #fff;
-  margin: 0;
-}
-
-.blueprint-blocks-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-}
-
-.blueprint-card {
-  position: relative;
-  background: #100a13;
-  border: 1px solid rgba(217, 185, 206, 0.18);
-  border-radius: 4px;
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  transition: transform 0.4s ease, border-color 0.4s ease;
-}
-
-.blueprint-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(217, 185, 206, 0.45);
-}
-
-.blueprint-card-slot {
-  height: 130px;
-  background: radial-gradient(circle at 50% 50%, #1a101f 0%, #0a060d 90%);
-  border: 1px dashed rgba(217, 185, 206, 0.22);
-  border-radius: 2px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.blueprint-slot-label {
-  font-family: 'DM Mono', monospace;
-  font-size: 8px;
-  letter-spacing: 0.14em;
-  color: var(--accent-rose);
-  opacity: 0.8;
-}
-
-.blueprint-slot-icon {
-  font-size: 26px;
-  filter: drop-shadow(0 0 8px rgba(217, 185, 206, 0.3));
-}
-
-.blueprint-card-num {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 28px;
-  color: var(--accent-rose);
-  line-height: 1;
-}
-
-.blueprint-card-title {
-  font-family: 'Manrope', sans-serif;
-  font-size: 15px;
-  font-weight: 700;
-  color: #fff;
-  margin: 0;
-}
-
-.blueprint-card-body {
-  font-size: 12px;
+.butterfly-desc {
+  font-size: 13px;
   line-height: 1.6;
   color: var(--muted);
-  margin: 0;
 }
 
 /* Section 4: Team Section */
@@ -1705,12 +1601,6 @@ h1 em, h2 em {
    RESPONSIVE DESIGN (About Section)
    ========================================================================== */
 
-@media (max-width: 1024px) {
-  .blueprint-blocks-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
 @media (max-width: 768px) {
   .about-hero-wrap {
     padding: 60px 20px 40px;
@@ -1735,11 +1625,14 @@ h1 em, h2 em {
     font-size: 48px;
     letter-spacing: 0.06em;
   }
-  .anim-slots-grid {
-    grid-template-columns: 1fr;
+  .butterfly-showcase-box {
+    padding: 16px;
   }
-  .blueprint-blocks-grid {
-    grid-template-columns: 1fr;
+  .butterfly-canvas {
+    height: 250px;
+  }
+  .butterfly-video {
+    max-height: 210px;
   }
   .team-avatars-row {
     grid-template-columns: 1fr;
