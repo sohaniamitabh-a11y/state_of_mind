@@ -49,6 +49,38 @@ def serve_app():
     return send_from_directory(frontend_dir, "index.html")
 
 
+@app.route("/ping-db")
+def ping_db():
+    """Keepalive heartbeat that runs a lightweight query against Aiven MySQL."""
+    db_host = os.getenv("DB_HOST")
+    db_port = os.getenv("DB_PORT")
+    if not db_host or not db_port:
+        return {"status": "error", "message": "Missing DB configuration"}, 500
+
+    db_name = os.getenv("DB_NAME", "defaultdb")
+    ssl_ca = os.getenv("DB_SSL_CA", "ignore/ca.pem")
+
+    try:
+        conn = mysql.connector.connect(
+            host=db_host,
+            port=int(db_port),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            database=db_name,
+            ssl_ca=ssl_ca,
+            ssl_verify_cert=False,
+            connection_timeout=5,
+        )
+        cur = conn.cursor()
+        cur.execute("SELECT 1")
+        cur.fetchone()
+        cur.close()
+        conn.close()
+        return {"status": "ok", "message": "Aiven MySQL keepalive successful"}, 200
+    except Exception as err:
+        return {"status": "error", "message": str(err)}, 500
+
+
 @app.route("/<path:filename>")
 def serve_root_static(filename):
     """Serve static files requested from root (e.g. style.css, script.js, assets/...)."""

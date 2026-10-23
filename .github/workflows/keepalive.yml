@@ -1,0 +1,25 @@
+name: Keepalive (Aiven MySQL & Render)
+
+on:
+  schedule:
+    # Runs every 14 minutes to prevent Render spin-down (15 min limit) and Aiven inactivity pause
+    - cron: '*/14 * * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  keepalive:
+    name: Ping Database & Web Service
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Ping /ping-db endpoint
+        run: |
+          echo "Sending keepalive heartbeat to State of Mind..."
+          RESPONSE=$(curl -sSf --retry 2 --max-time 45 "https://state-of-mind.onrender.com/ping-db" || echo "curl_failed")
+          echo "Response: $RESPONSE"
+          if [ "$RESPONSE" = "curl_failed" ]; then
+            echo "::warning ::Heartbeat ping failed or timed out during wake-up. Retrying fallback query..."
+            curl -sSf --max-time 60 "https://state-of-mind.onrender.com/get-state?mood=Calm/Serene" || true
+          fi
+
